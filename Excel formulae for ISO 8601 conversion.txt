@@ -1,0 +1,10 @@
+Some Excel formulae for extracting dates and times as text for ISO 8601-compliant timestamps. Assumes your first Excel date/time is in cell A1. Modify cell reference as needed.
+
+For date component:
+=CONCATENATE(TEXT(YEAR(A1),"0000"),"-",TEXT(MONTH(A1),"00"),"-",TEXT(DAY(A1),"00"))
+
+For time component:
+=CONCATENATE(TEXT(HOUR(A1),"00"),":",TEXT(MINUTE(A1),"00"),":",TEXT(SECOND(A1),"00"))
+
+For complete ISO 8601 timestamp, for an example where times were given in Honolulu Standard Time, i.e., GMT-10:00:
+=CONCATENATE(TEXT(YEAR(A1),"0000"),"-",TEXT(MONTH(A1),"00"),"-",TEXT(DAY(A1),"00"),"T",TEXT(HOUR(A1),"00"),":",TEXT(MINUTE(A1),"00"),":",TEXT(SECOND(A1),"00"),"-10:00")
