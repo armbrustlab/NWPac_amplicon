@@ -78,9 +78,11 @@ subdirs_16S=$(find . -type f -name 'V4_515F_New_V4_806R_New*.fastq' | grep -o "\
 # now, iterate through the list of subdirectories and generate stability files
 for subdir in $subdirs_16S
 do
-	# sending to /dev/null suppresses output
+	# sending to /dev/null to suppress output
 	mothur "#make.file(inputdir='$subdir', type=fastq)" > /dev/null
 	echo "mothur now making stability file for 16S files in directory:"
 	echo $subdir
 done
+
+
 
