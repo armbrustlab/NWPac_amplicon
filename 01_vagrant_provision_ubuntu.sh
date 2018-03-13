@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # vagrant_provision_ubuntu.sh
 
 # shell script for provisioning vagrant box running ubuntu 16.06.4

@@ -1,9 +1,11 @@
+#!/bin/bash
+
 # metagenomics_provision.sh
 
-# shell script for installing necessary tools for metagenomics analysis
+# shell script for installing necessary tools for analysis of 16S/18S amplicon sequence data
 # Jamie Collins, Armbrust Lab, University of Washington; james.r.collins@aya.yale.edu
 
-# assumes we are setting up from scratch on a Ubuntu machine image
+# assumes we are setting up from scratch on a Ubuntu machine image, perhaps using the script "01_vagrant_provision_ubuntu.sh"
 # *** if using AWS: also assumes we've allowed SSH traffic in the security group we used to set up our machine image
 
 # ----------------------------------------------------
