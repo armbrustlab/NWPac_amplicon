@@ -15,7 +15,7 @@
 # 2. mothur is already be added to the path
 # 3. scripts is also be added to the path
 
-# some basic formatting must be adhered to:
+# some basic formatting directions, so that this all works correctly:
 # 1. filename format (from sequencer) should be:
 # PRIMER-SAMPLENAME_BARCODE_R1.fastq (e.g., V4_515F_New_V4_806R_New-64039_ATTAGCGAGT_R2.fastq)
 # 2. all 16S files should begin with "V4_515F_New_V4," but can be stored in any directories or subdirectories so long as complementary 
@@ -48,7 +48,7 @@ echo "Now working on files in or in suboordinate directories to:"
 echo $file_dir
 
 echo "Converting any hyphens in filenames to underscores..."
-cd $file_dir
+cd ''"$file_dir"''
 find . -name "*.fastq" -exec bash -c 'mv "$1" "${1//-/_}"' - '{}' \;
 
 # count the number of sequence-containing .fastq files in the directory structure (for comparison to e.g., a sample list)
@@ -70,6 +70,7 @@ find . -name "V4_515F_New_V4*[1|2].fastq" | wc -l
 
 # merge paired-end reads
 # we will use mothur, but you could in theory use pear or some other software for this as well
+echo "Now merging paired-end 16S reads using mothur. Check mothur logfiles for results..."
 
 # get relative paths of all the subdirectories which contain 16S .fastq files
 subdirs_16S=$(find . -type f -name 'V4_515F_New_V4_806R_New*.fastq' | grep -o "\(.*\)/" | sort -u | cut -c 3-)
@@ -77,6 +78,9 @@ subdirs_16S=$(find . -type f -name 'V4_515F_New_V4_806R_New*.fastq' | grep -o "\
 # now, iterate through the list of subdirectories and generate stability files
 for subdir in $subdirs_16S
 do
-	mothur "#make.file(inputdir='$subdir', type=fastq)"
+	# sending to /dev/null suppresses output
+	mothur "#make.file(inputdir='$subdir', type=fastq)" > /dev/null
+	echo "mothur now making stability file for 16S files in directory:"
+	echo $subdir
 done
 

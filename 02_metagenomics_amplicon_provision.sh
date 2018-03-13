@@ -12,7 +12,9 @@
 # install, set up necessary packages (if not yet installed)
 # ----------------------------------------------------
 
+# ----------------------------------------------------
 # mothur
+# ----------------------------------------------------
 
 # install dependencies, if required
 
@@ -39,15 +41,33 @@ export PATH=$PATH:$(pwd)
 # make
 # export PATH=$PATH:$(pwd)
 
-# # PEAR (if desired)
-# # N.B. that this snippet here will load a much older version of the code still hanging out on GitHub
+# ----------------------------------------------------
+# PEAR (if desired)
+# ----------------------------------------------------
 
-# git clone https://github.com/tseemann/PEAR.git ~/Code/PEAR
+# # option 1: compile from old source on GitHub
+# # N.B. this snippet will load a much older version of the code still hanging out on GitHub, which I (Jamie) have
+# # forked to my GitHub account
+
+# git clone https://github.com/jamesrco/PEAR.git ~/Code/PEAR
 # cd ~/Code/PEAR
+# ./configure
+# make clean
 # make
-# sudo make install
 
-# # it seems that the latest version of PEAR is now available here via some convoluted download service:
+# # option 2: build from latest source
+# # it seems that the *latest* version of PEAR is now available here via some convoluted download service:
 # # http://www.exelixis-lab.org/web/software/pear
-# # *** this makes it difficult to source and install using any sort of script
+# # *** this makes it difficult to source and install using any sort of script, but if you want to do this (and are successful)
+# # you will end up downloading the latest release source as a zipball (the file "pear-src-0.9.11.tar.gz" or similar)
+
+# # you can then try the following, per guidance I received in response to a post on the PEAR user forum:
+# # https://groups.google.com/forum/#!topic/pear-users/zvaVbn4BVGU
+
+# # once in the directory where you unzipped your tarred zipball...
+
+# ./configure
+# make clean
+# make
+
 
