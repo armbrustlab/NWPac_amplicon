@@ -66,6 +66,8 @@ export PATH=$PATH:$(pwd)
 
 # # once in the directory where you unzipped your tarred zipball...
 
+# # may have to execute the additional command on line below ("autoreconf -i") if you are building from source on a mac
+# # autoreconf -i
 # ./configure
 # make clean
 # make
