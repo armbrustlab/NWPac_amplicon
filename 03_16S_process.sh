@@ -28,12 +28,13 @@
 # ----------------------------------------------------
 
 file_dir="/Users/jamesrco/Dropbox/Archived science projects & data/Projects & science data/2018/NWPac 16S & 18S/fastq/"
-# OLIGOS="/mnt/nfs/home/rlalim/gradientscruise/16S/oligos.fa"
+prefix="16S"
+numproc=4 # number of cores/processors for tasks that can be parallelized
+oligos_16S="/Users/jamesrco/Code/NWPac_amplicon/primers/16S_oligos.fa" # file containing primer sequences
 # V4REF="/mnt/nfs/home/rlalim/gradientscruise/db/silva.v4.fasta"
 # DB_REF="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
 # DB_TAX="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
 # TAXNAME="silvaNRv128PR2plusMMETSP"
-# PREFIX="16S_stations"
 # CLASS_CUTOFF=60 #bootstrap value for classification against the reference db at which the taxonomy is deemed valid
 # OTU_CUTOFF=0.03 #percent similarity at which we want to cluster OTUs
 # MAXLENGTH=275 #max sequence length when merged
@@ -49,39 +50,67 @@ echo $file_dir
 
 echo "Converting any hyphens in filenames to underscores..."
 cd ''"$file_dir"''
-find . -name "*.fastq" -exec bash -c 'mv "$1" "${1//-/_}"' - '{}' \;
+# find . -name "*.fastq" -exec bash -c 'mv "$1" "${1//-/_}"' - '{}' \;
 
-# count the number of sequence-containing .fastq files in the directory structure (for comparison to e.g., a sample list)
-# we want to exclude from this count .fastq files such as the "unmatchedIndex.fastq" files (hence the use of the regex)
+# # count the number of sequence-containing .fastq files in the directory structure (for comparison to e.g., a sample list)
+# # we want to exclude from this count .fastq files such as the "unmatchedIndex.fastq" files (hence the use of the regex)
+# echo "Total number of .fastq files in the current directory or in suboordinate directories:"
+# find . -name "*[1|2].fastq" | wc -l
 
-echo "Total number of .fastq files in the current directory or in suboordinate directories:"
-find . -name "*[1|2].fastq" | wc -l
+# echo "Total number of 16S-containing .fastq files in the current directory or in suboordinate directories:"
+# find . -name "V4_515F_New_V4*[1|2].fastq" | wc -l
 
-echo "Total number of 16S-containing .fastq files in the current directory or in suboordinate directories:"
-find . -name "V4_515F_New_V4*[1|2].fastq" | wc -l
+# # # make a list of the fastq filenames
+# # echo "Saving a list of 16S .fastq filenames..."
+# # find . -name "V4_515F_New_V4*[1|2].fastq" > 16S_fastq_filenames.txt
 
-# # make a list of the fastq filenames
-# echo "Saving a list of 16S .fastq filenames..."
-# find . -name "V4_515F_New_V4*[1|2].fastq" > 16S_fastq_filenames.txt
+# # ----------------------------------------------------
+# # processing steps
+# # ----------------------------------------------------
 
-# ----------------------------------------------------
-# pre-processing steps
-# ----------------------------------------------------
+# # merge paired-end reads
+# # we will use mothur, but you could in theory use pear or some other software for this as well
+# echo "Now merging paired-end 16S reads using mothur. Check mothur logfiles for results..."
 
-# merge paired-end reads
-# we will use mothur, but you could in theory use pear or some other software for this as well
-echo "Now merging paired-end 16S reads using mothur. Check mothur logfiles for results..."
+# # get relative paths of all the subdirectories which contain 16S .fastq files
+# subdirs_16S=$(find . -type f -name 'V4_515F_New_V4_806R_New*.fastq' | grep -o "\(.*\)/" | sort -u | cut -c 3-)
 
-# get relative paths of all the subdirectories which contain 16S .fastq files
-subdirs_16S=$(find . -type f -name 'V4_515F_New_V4_806R_New*.fastq' | grep -o "\(.*\)/" | sort -u | cut -c 3-)
+# # now, iterate through the list of subdirectories and generate stability files
+# for subdir in $subdirs_16S
+# do
+# 	# sending to /dev/null to suppress output
+# 	mothur "#make.file(inputdir='$subdir', type=fastq, prefix=${prefix}.stability)" > /dev/null
+# 	echo "Now making mothur stability file for 16S files in directory:"
+# 	echo $subdir
+# done
 
-# now, iterate through the list of subdirectories and generate stability files
-for subdir in $subdirs_16S
+# # report back if any unpaired files were found in directories with 16S data
+# echo "The following unpaired .fastq files were found in directories with 16S data:"
+# find . -name "${prefix}.stability.single.files" | xargs cat 
+
+# # merge forward and reverse reads
+# echo "Merging forward and reverse reads using mothur..."
+# stabilityfiles_16S=$(find . -type f -name "${prefix}.stability.paired.files" -o -name "${prefix}.stability.files")
+# for stabilityfile in $stabilityfiles_16S
+# do
+# 	echo "Now merging forward and reverse reads in file:"
+# 	echo $stabilityfile
+# 	mothur "#make.contigs(file='$stabilityfile', processors=${numproc})"
+# done
+
+# # generate sequence quality reports
+# echo "Generating sequence quality reports..."
+ goodfastafiles_16S=$(find . -type f -name "${prefix}.*.trim.contigs.fasta")
+# for fastafile in $goodfastafiles_16S
+# do
+# 	mothur "#summary.seqs(fasta='$fastafile', processors=4)"
+# done
+
+# remove primers. reads with at least one mismatch to either of the primers are discarded as *.scrap.fasta
+echo "Removing primers..."
+for fastafile in $goodfastafiles_16S
 do
-	# sending to /dev/null to suppress output
-	mothur "#make.file(inputdir='$subdir', type=fastq)" > /dev/null
-	echo "mothur now making stability file for 16S files in directory:"
-	echo $subdir
+	mothur "#trim.seqs(fasta='$fastafile', oligos = $oligos_16S, checkorient = T)"
 done
 
 
