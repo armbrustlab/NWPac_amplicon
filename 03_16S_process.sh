@@ -50,68 +50,62 @@ echo $file_dir
 
 echo "Converting any hyphens in filenames to underscores..."
 cd ''"$file_dir"''
-# find . -name "*.fastq" -exec bash -c 'mv "$1" "${1//-/_}"' - '{}' \;
+find . -name "*.fastq" -exec bash -c 'mv "$1" "${1//-/_}"' - '{}' \;
 
-# # count the number of sequence-containing .fastq files in the directory structure (for comparison to e.g., a sample list)
-# # we want to exclude from this count .fastq files such as the "unmatchedIndex.fastq" files (hence the use of the regex)
-# echo "Total number of .fastq files in the current directory or in suboordinate directories:"
-# find . -name "*[1|2].fastq" | wc -l
+# count the number of sequence-containing .fastq files in the directory structure (for comparison to e.g., a sample list)
+# we want to exclude from this count .fastq files such as the "unmatchedIndex.fastq" files (hence the use of the regex)
+echo "Total number of .fastq files in the current directory or in suboordinate directories:"
+find . -name "*[1|2].fastq" | wc -l
 
-# echo "Total number of 16S-containing .fastq files in the current directory or in suboordinate directories:"
-# find . -name "V4_515F_New_V4*[1|2].fastq" | wc -l
+echo "Total number of 16S-containing .fastq files in the current directory or in suboordinate directories:"
+find . -name "V4_515F_New_V4*[1|2].fastq" | wc -l
 
-# # # make a list of the fastq filenames
-# # echo "Saving a list of 16S .fastq filenames..."
-# # find . -name "V4_515F_New_V4*[1|2].fastq" > 16S_fastq_filenames.txt
+# # make a list of the fastq filenames
+# echo "Saving a list of 16S .fastq filenames..."
+# find . -name "V4_515F_New_V4*[1|2].fastq" > 16S_fastq_filenames.txt
 
-# # ----------------------------------------------------
-# # processing steps
-# # ----------------------------------------------------
+# ----------------------------------------------------
+# processing steps
+# ----------------------------------------------------
 
-# # merge paired-end reads
-# # we will use mothur, but you could in theory use pear or some other software for this as well
-# echo "Now merging paired-end 16S reads using mothur. Check mothur logfiles for results..."
+# merge paired-end reads
+# we will use mothur, but you could in theory use pear or some other software for this as well
+echo "Now merging paired-end 16S reads using mothur. Check mothur logfiles for results..."
 
-# # get relative paths of all the subdirectories which contain 16S .fastq files
-# subdirs_16S=$(find . -type f -name 'V4_515F_New_V4_806R_New*.fastq' | grep -o "\(.*\)/" | sort -u | cut -c 3-)
+# get relative paths of all the subdirectories which contain 16S .fastq files
+subdirs_16S=$(find . -type f -name 'V4_515F_New_V4_806R_New*.fastq' | grep -o "\(.*\)/" | sort -u | cut -c 3-)
 
-# # now, iterate through the list of subdirectories and generate stability files
-# for subdir in $subdirs_16S
-# do
-# 	# sending to /dev/null to suppress output
-# 	mothur "#make.file(inputdir='$subdir', type=fastq, prefix=${prefix}.stability)" > /dev/null
-# 	echo "Now making mothur stability file for 16S files in directory:"
-# 	echo $subdir
-# done
-
-# # report back if any unpaired files were found in directories with 16S data
-# echo "The following unpaired .fastq files were found in directories with 16S data:"
-# find . -name "${prefix}.stability.single.files" | xargs cat 
-
-# # merge forward and reverse reads
-# echo "Merging forward and reverse reads using mothur..."
-# stabilityfiles_16S=$(find . -type f -name "${prefix}.stability.paired.files" -o -name "${prefix}.stability.files")
-# for stabilityfile in $stabilityfiles_16S
-# do
-# 	echo "Now merging forward and reverse reads in file:"
-# 	echo $stabilityfile
-# 	mothur "#make.contigs(file='$stabilityfile', processors=${numproc})"
-# done
-
-# # generate sequence quality reports
-# echo "Generating sequence quality reports..."
- goodfastafiles_16S=$(find . -type f -name "${prefix}.*.trim.contigs.fasta")
-# for fastafile in $goodfastafiles_16S
-# do
-# 	mothur "#summary.seqs(fasta='$fastafile', processors=4)"
-# done
-
-# remove primers. reads with at least one mismatch to either of the primers are discarded as *.scrap.fasta
-echo "Removing primers..."
-for fastafile in $goodfastafiles_16S
+# now, iterate through the list of subdirectories and generate stability files
+for subdir in $subdirs_16S
 do
-	mothur "#trim.seqs(fasta='$fastafile', oligos = $oligos_16S, checkorient = T)"
+	# sending to /dev/null to suppress output
+	mothur "#make.file(inputdir='$subdir', type=fastq, prefix=${prefix}.stability)" > /dev/null
+	echo "Now making mothur stability file for 16S files in directory:"
+	echo $subdir
 done
 
+# report back if any unpaired files were found in directories with 16S data
+echo "The following unpaired .fastq files were found in directories with 16S data:"
+find . -name "${prefix}.stability.single.files" | xargs cat 
 
+# at this point, easiest to merge the stability files into a single file
+echo "Merging individual stability files; processing will proceed from here on a single pooled dataset..."
+stabilityfiles_16S=$(find . -type f -name "${prefix}.stability.paired.files" -o -name "${prefix}.stability.files")
+cat $stabilityfiles_16S > ${prefix}.pooled.stability.files
 
+# merge forward and reverse reads
+echo "Merging forward and reverse reads using mothur..."
+mothur "#make.contigs(file='${prefix}.pooled.stability.files', processors=${numproc})"
+
+# generate sequence quality reports
+echo "Generating sequence quality reports..."
+mothur "#summary.seqs(fasta='${prefix}*.trim.contigs.fasta', processors=${numproc})"
+
+# remove primers; reads with at least one mismatch to either of the primers are discarded as *.scrap.fasta
+echo "Removing primers..."
+mothur "#trim.seqs(fasta='${prefix}*.trim.contigs.fasta', oligos = $oligos_16S, checkorient = T)"
+
+# perform quality filtering; reads with any ambiguous bases or that are too long (i.e., not merged properly) are discarded
+echo "Performing quality filtering..."
+mothur "#screen.seqs(fasta='$(ls -t ${prefix}*.trim.fasta | head -n1), group=$(ls -t ${prefix}*.groups | head -n1), maxambig=0, maxlength=$MAXLENGTH, processors=${numproc})"
+#mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.fasta | head -n1), processors=${numproc})"
