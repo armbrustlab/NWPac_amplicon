@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# metagenomics_provision.sh
+# 02_metagenomics_amplicon_provision.sh
 
 # shell script for installing necessary tools for analysis of 16S/18S amplicon sequence data
 # Jamie Collins, Armbrust Lab, University of Washington; james.r.collins@aya.yale.edu
@@ -13,12 +13,26 @@
 # ----------------------------------------------------
 
 # ----------------------------------------------------
+# necessary python components 
+# ----------------------------------------------------
+
+# install pip
+
+sudo apt-get update && sudo apt-get install python-pip
+
+# biopython (pip will install numpy as well)
+
+pip install biopython
+# conda install -c anaconda biopython # achieves same thing if using conda
+
+# ----------------------------------------------------
 # mothur
 # ----------------------------------------------------
 
-# install dependencies, if required
+# install dependencies
 
-# mac requires that boost first be installed; haven't verified this is necessary yet on Ubuntu
+# boost (will also install python3)
+
 brew install boost
 brew install boost-python
 
@@ -26,10 +40,14 @@ brew install boost-python
 
 # option 1: direct download latest compiled release from the Github repo (no compilation necessary)
 export VERSION=$(curl -s "https://github.com/mothur/mothur/releases/latest" | grep -o 'tag/[v.0-9]*' | awk -F/ '{print $2}')
-# linux
-curl -L https://github.com//mothur/mothur/releases/download/$VERSION/Mothur.linux_64.zip | tar -xz
-# mac
-curl -L https://github.com//mothur/mothur/releases/download/$VERSION/Mothur.mac_64.OSX-10.12.zip | tar -xz
+
+# ubuntu
+wget https://github.com//mothur/mothur/releases/download/$VERSION/Mothur.linux_64.zip
+unzip Mothur.linux_64.zip
+
+# # mac
+# curl -L https://github.com//mothur/mothur/releases/download/$VERSION/Mothur.mac_64.OSX-10.12.zip | tar -xz
+
 cd mothur
 export PATH=$PATH:$(pwd)
 

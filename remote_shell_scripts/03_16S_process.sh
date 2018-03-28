@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 16S_process.sh
+# 03_16S_process.sh
 
 # a shell script for processing the NWPac 16S amplicon data
 # Jamie Collins, Armbrust Lab, University of Washington; james.r.collins@aya.yale.edu
@@ -28,9 +28,11 @@
 # ----------------------------------------------------
 
 file_dir="/Users/jamesrco/Dropbox/Archived science projects & data/Projects & science data/2018/NWPac 16S & 18S/fastq/"
-prefix="16S"
+# top-level directory under which all .fastq files reside; this is also where mothur output will be dumped
+prefix="16S" # file prefix to be appended
 numproc=4 # number of cores/processors for tasks that can be parallelized
-oligos_16S="/Users/jamesrco/Code/NWPac_amplicon/primers/16S_oligos.fa" # file containing primer sequences
+oligos_16S="primers/16S_oligos.fa" # relative path from this script to file containing primer sequences
+maxlength=275 # max sequence length when merged
 # V4REF="/mnt/nfs/home/rlalim/gradientscruise/db/silva.v4.fasta"
 # DB_REF="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
 # DB_TAX="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
@@ -39,6 +41,12 @@ oligos_16S="/Users/jamesrco/Code/NWPac_amplicon/primers/16S_oligos.fa" # file co
 # OTU_CUTOFF=0.03 #percent similarity at which we want to cluster OTUs
 # MAXLENGTH=275 #max sequence length when merged
 # BAD_TAXA="Mitochondria-unknown-Archaea-Eukaryota-Chloroplast"
+
+# ----------------------------------------------------
+# get, store some environment information
+# ----------------------------------------------------
+
+code_dir=$(pwd)
 
 # ----------------------------------------------------
 # pre-processing/"cleanup" steps
@@ -99,13 +107,23 @@ mothur "#make.contigs(file='${prefix}.pooled.stability.files', processors=${nump
 
 # generate sequence quality reports
 echo "Generating sequence quality reports..."
-mothur "#summary.seqs(fasta='${prefix}*.trim.contigs.fasta', processors=${numproc})"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.contigs.fasta | head -n1), processors=${numproc})"
 
 # remove primers; reads with at least one mismatch to either of the primers are discarded as *.scrap.fasta
 echo "Removing primers..."
-mothur "#trim.seqs(fasta='${prefix}*.trim.contigs.fasta', oligos = $oligos_16S, checkorient = T)"
+mothur "#trim.seqs(fasta=$(ls -t ${prefix}*.trim.contigs.fasta | head -n1), oligos = $code_dir/$oligos_16S, checkorient = T,\
+ processors=${numproc})"
 
 # perform quality filtering; reads with any ambiguous bases or that are too long (i.e., not merged properly) are discarded
 echo "Performing quality filtering..."
-mothur "#screen.seqs(fasta='$(ls -t ${prefix}*.trim.fasta | head -n1), group=$(ls -t ${prefix}*.groups | head -n1), maxambig=0, maxlength=$MAXLENGTH, processors=${numproc})"
-#mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.fasta | head -n1), processors=${numproc})"
+mothur "#screen.seqs(fasta=$(ls -t ${prefix}*.trim.fasta | head -n1), group=$(ls -t ${prefix}*.groups | head -n1),\
+ maxambig=0, maxlength=${maxlength}, processors=${numproc})"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1), processors=${numproc})"
+
+# collapse duplicate sequences; note that mothur still keeps track of the total counts using the counts table made below,
+# so we're not losing rel. abundance info
+echo "Finding unique reads..."
+mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1))"
+
+# *** can't make counts table directly due to mismatch between groups file and contigs file... will need some
+# version of rachelle's python script here

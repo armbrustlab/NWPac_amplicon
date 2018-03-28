@@ -1,20 +1,17 @@
 #!/bin/bash
 
-# vagrant_provision_ubuntu.sh
+# 01_vagrant_provision_ubuntu.sh
 
 # shell script for provisioning vagrant box running ubuntu 16.06.4
 # also, could be the basis for provisioning an AWS image
 # Jamie Collins, Armbrust Lab, University of Washington; james.r.collins@aya.yale.edu
 
+# *** assumes this shell script is present on the remote computer (not your local machine)
+# to do this, you can use the associated scripts 01_local_copy_to_vagrant.sh or 01_local_copy_to_AWS.sh
+
 # *** if using AWS: will assume we've allowed SSH traffic in the security group we used to set up our machine image
 
-# ----------------------------------------------------
-# secure copy necessary files to the remote
-# ----------------------------------------------------
-
-# use scp to copy the rclone config file called ".rclone.conf" to the remote 
-
-scp -i /Users/jamesrco/Vagrant/.vagrant/machines/default/virtualbox/private_key -P 2222 ~/.rclone.conf vagrant@127.0.0.1:.
+# to run: source ./01_vagrant_provision_ubuntu.sh
 
 # ----------------------------------------------------
 # provision ubuntu 16.06.4 environment
@@ -27,10 +24,10 @@ sudo apt-get install unzip
 curl https://rclone.org/install.sh | sudo bash 
 echo "q" | rclone config --config=".rclone.conf"
 
-# install brew (if needed)
+# install linuxbrew (if needed)
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
 test -d ~/.linuxbrew && PATH="$HOME/.linuxbrew/bin:$HOME/.linuxbrew/sbin:$PATH"
 test -d /home/linuxbrew/.linuxbrew && PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH"
 test -r ~/.bash_profile && echo "export PATH='$(brew --prefix)/bin:$(brew --prefix)/sbin'":'"$PATH"' >>~/.bash_profile
 echo "export PATH='$(brew --prefix)/bin:$(brew --prefix)/sbin'":'"$PATH"' >>~/.profile
-
+echo "export PATH='/home/linuxbrew/.linuxbrew/bin'":'"$PATH"'
