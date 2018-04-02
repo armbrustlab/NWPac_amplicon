@@ -118,12 +118,20 @@ mothur "#trim.seqs(fasta=$(ls -t ${prefix}*.trim.contigs.fasta | head -n1), olig
 echo "Performing quality filtering..."
 mothur "#screen.seqs(fasta=$(ls -t ${prefix}*.trim.fasta | head -n1), group=$(ls -t ${prefix}*.groups | head -n1),\
  maxambig=0, maxlength=${maxlength}, processors=${numproc})"
-mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1), processors=${numproc})"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1), processors=)"
 
 # collapse duplicate sequences; note that mothur still keeps track of the total counts using the counts table made below,
 # so we're not losing rel. abundance info
 echo "Finding unique reads..."
 mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1))"
 
-# *** can't make counts table directly due to mismatch between groups file and contigs file... will need some
-# version of rachelle's python script here
+# make counts table
+# *** note that we can't make counts table directly due to mismatches between our groups file and
+# our contigs file; we can use a short python script mothur-2-changeGroupFile.py
+# written by @rachellelim to perform the necessary matching
+
+echo "Making counts table. Calling Python script to fix mismatches between groups file and contigs file. You must have Python 2.7 installed, with the package Biopython and its dependencies..."
+# ${code_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups # only works if mothur-2-changeGroupFile.py is executable
+python2 ${code_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups
+mothur "#count.seqs(name=$(ls -t ${prefix}*.good.names | head -n1), group=$(ls -t ${prefix}*.short.groups | head -n1), processors=${numproc})"
+
