@@ -45,7 +45,7 @@ def writeGroupFile(seqSet, groupFile, outputFile):
                     outFile.write(line)
                     outfile_ctr += 1
     print "No. sequences in original groups file \"" + groupFile + "\": " + str(infile_ctr)
-    print "No. sequences in new shortened groups file \"" + outputFile + "\": " + str(outfile_ctr)
+    print "No. sequences written to new shortened groups file \"" + outputFile + "\": " + str(outfile_ctr)
     
 def main():
     fastaFile = sys.argv[1]
