@@ -3,7 +3,9 @@
 # 01_vagrant_provision_ubuntu.sh
 
 # shell script for provisioning vagrant box running ubuntu 16.06.4
-# also, could be the basis for provisioning an AWS image
+# also, could be the basis for provisioning an AWS image, or simply for getting all the necessary software
+# for this great adventure up and running on your own computer
+
 # Jamie Collins, Armbrust Lab, University of Washington; james.r.collins@aya.yale.edu
 
 # *** assumes this shell script is present on the remote computer (not your local machine)
