@@ -3,8 +3,8 @@
 """
 mothur-2-changeGroupFile.py
 
-Created on Tue Nov 1 16:15:50 2016 by @rachellelim
-Revised on Mon Apr 2 2018 by @jamesco; subsequent version history on GitHub
+Created on Tue Nov  1 16:15:50 2016 by @rachellelim
+Revised on Tue Apr  3 14:12:33 2018 by @jamesco; subsequent version history on GitHub
 
 @author: rachellelim
 @author: jamesrco
@@ -31,18 +31,21 @@ def readFasta(fastaFile):
     fastaSeqs = SeqIO.parse(open(fastaFile), "fasta")
     for seq in fastaSeqs:
         seqSet.add(seq.id)
-    print len(seqSet)
+    print "No. sequences in contigs file \"" + fastaFile + "\": " + str(len(seqSet))
     return seqSet
 
 def writeGroupFile(seqSet, groupFile, outputFile):
-    ctr = 0
+    outfile_ctr = 0
+    infile_ctr = 0
     with open(groupFile, "r") as inFile:
         with open(outputFile, "w") as outFile:
             for line in inFile:
+                infile_ctr += 1
                 if line.split()[0] in seqSet:
                     outFile.write(line)
-                    ctr += 1
-    return ctr
+                    outfile_ctr += 1
+    print "No. sequences in original groups file \"" + groupFile + "\": " + str(infile_ctr)
+    print "No. sequences in new shortened groups file \"" + outputFile + "\": " + str(outfile_ctr)
     
 def main():
     fastaFile = sys.argv[1]
