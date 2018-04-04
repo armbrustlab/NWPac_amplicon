@@ -20,15 +20,17 @@ First, we'll initialize, start up and provision a cloud computing instance or lo
 
 ### Option 1: Use an AWS machine image
 
-1. [Log into your AWS console](https://console.aws.amazon.com/console/home), then your [EC2 Management Console](https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2). (The second link will only work for you if you use US West (Oregon) like I do -- otherwise, just use the EC2 link on your [console homepage](https://console.aws.amazon.com/console/home).) Once at EC2, launch a Ubuntu Server 16.04 machine image and configure it as desired. Launch the image, making sure you create an SSH key pair if you haven't already done so. (This is how you'll access your machine image once its running. Amazon has some [basic directions here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html) to connect to its machine images via SSH. An even better guide to creating and protecting ssh keys using **ssh-keygen** [can be found here](http://people.seas.harvard.edu/~nater/ec2-keyauth/).) As a general best practice, you should make sure your private key file *isn't* publicly accessible and *is* password protected; these can be accomplished using the **chmod** and **ssh-keygen -p -f** commands; see [this page](http://people.seas.harvard.edu/~nater/ec2-keyauth/) for directions.)
+1. [Log into your AWS console](https://console.aws.amazon.com/console/home), then your [EC2 Management Console](https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2). (The second link will only work for you if you use US West (Oregon) like I do -- otherwise, just use the EC2 link on your [console homepage](https://console.aws.amazon.com/console/home).) Once at EC2, launch a Ubuntu Server 16.04 machine image and configure it as desired. *Remember to give yourself enough storage to hold all your input (raw) .fastq files and all the files/products you'll be producing along the way. These intermediate products can be quite large.*
 
-2. Wait for your AMI to get up and running (you can monitor its status via your EC2 console; wait until Instance State indicates "running," with a green dot). Once running, connect to the image via SSH. Assuming again that you launched a Ubuntu machine image, open a new shell (this is the "Terminal" on a Macintosh) and connect to your AMI via SSH by typing:
+2. Launch the image, making sure you create an SSH key pair if you haven't already done so. (This is how you'll access your machine image once its running. Amazon has some [basic directions here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html) to connect to its machine images via SSH. An even better guide to creating and protecting ssh keys using **ssh-keygen** [can be found here](http://people.seas.harvard.edu/~nater/ec2-keyauth/).) As a general best practice, you should make sure your private key file *isn't* publicly accessible and *is* password protected; these can be accomplished using the **chmod** and **ssh-keygen -p -f** commands; see [this page](http://people.seas.harvard.edu/~nater/ec2-keyauth/) for directions.)
+
+3. Wait for your AMI to get up and running (you can monitor its status via your EC2 console; wait until Instance State indicates "running," with a green dot). Once running, connect to the image via SSH. Assuming again that you launched a Ubuntu machine image, open a new shell (this is the "Terminal" on a Macintosh) and connect to your AMI via SSH by typing:
 ```
 ssh -i /path/to/my-key-pair.pem ubuntu@ec2-198-51-100-1.compute-1.amazonaws.com
 ```
 where `/path/to/my-key-pair.pem` is the path (on *your* computer) to your private key file. The private key file is (suprise!) the private half of the key pair you specified or created when you launched the machine image. The next bit (`ubuntu@ec2-198-51-100-1.compute-1.amazonaws.com` in this example) is the username and server address. On a Mac, your ssh keys should be in the .ssh folder in your user directory (`~/.ssh`). You can get get the server address from the information provided for the image in your EC2 console. (Copy the address listed in the column called "Public DNS.") Answer "yes" when SSH asks you if you want to continue connecting; you should then receive a response telling you the AMI has been added to your list of known hosts. Note that you use the username `ubuntu` when connecting to a Ubuntu instance; you would replace the `ubuntu` bit with `ec2-user` if connecting to an Amazon Linux or Red Hat EC2 instance. (A good rundown of these idiosyncracies [can be found here](https://99robots.com/how-to-ssh-to-ec2-instance-on-aws/).)
 
-3. Once you are securely connected to your machine image, it's time to provision it. (Once you are connected to the remote client via SSH, your shell prompt should change from what you're used to seeing to something like `ubuntu@ip-172-31-23-22:~$`) 
+4. Once you are securely connected to your machine image, it's time to provision it. (Once you are connected to the remote client via SSH, your shell prompt should change from what you're used to seeing to something like `ubuntu@ip-172-31-23-22:~$`) 
 
 First, let's make sure git is installed, since we'll be cloning the scripts and other files in this repository directly to a new repository on the machine image.
 ```
@@ -41,7 +43,7 @@ Next, let's clone a copy of this repository to the machine image. This is an eas
 git clone https://github.com/jamesrco/NWPac_amplicon NWPac_amplicon
 ```
 
-Now, we can change directories to the newly cloned repository and run the provisioning scripts.
+5. Now, we can change directories to the newly cloned repository and run the provisioning scripts.
 
 The [first script](scripts/01_provision_ubuntu.sh) will install unzip and rclone. rclone will be useful if we want to access our .fastq files from a Dropbox or Google Drive location. 
 ```
@@ -101,9 +103,11 @@ With Vagrant, scp would not work unless I specified the path to the default Vagr
 
 ### Option 2: Use rclone to access files directly from the remote client
 
-Another (perhaps easier) option is to use rclone to grab all the .fastq files you will want directly from a Dropbox or Google Drive location. This frees you from having to download all the files onto your computer, zip them into archives, and then manually copy them to the remote, as above.
+Another (perhaps easier) option is to use rclone to grab all the .fastq files you will want directly from a Dropbox or Google Drive location. This frees you from having to download all the files onto your computer, zip them into archives, and then manually copy them to the remote, as above. *Note: Once you've uploaded your rclone configuration file to the remote and/or you've configured things using the `config` command, anyone with access (authorized or unauthorized) to the remote client will have full access to whatever cloud storage locations you've configured. The ssh tunnel provides you with some security, but be wary.*
 
-The [first provisioning script](scripts/01_provision_ubuntu.sh) downloads and installs rclone, so you're already halfway there. Once installed, you'll need to configure things. If you've already configured rclone on your own computer and you will be grabbing .fastq files from one of the locations in your existing rclone configuration, you can simply copy the config file `.rclone.conf` right on over to your remote using **scp**:
+The [first provisioning script](scripts/01_provision_ubuntu.sh) downloads and installs rclone, so you're already halfway there. Once installed, you'll need to either (1) upload a configuration file or (2) configure things using the built-in `config` command.
+
+**Case 1:** If you've already configured rclone on your own computer and you will be grabbing .fastq files from one of the locations in your existing rclone configuration, you can simply copy the config file `.rclone.conf` right on over to your remote using **scp**:
 ```
 scp -i /path/to/my-key-pair.pem ~/.rclone.conf ubuntu@c2-198-51-100-1.compute-1.amazonaws.com:.
 ```
@@ -111,5 +115,18 @@ or, for a Vagrant box, assuming you installed rclone right into your home direct
 ```
 scp -i /path/to/Vagrant/.vagrant/machines/default/virtualbox/private_key -P 2222 ~/.rclone.conf vagrant@127.0.0.1:.
 ```
+The rclone instance installed by the [provisioning script](scripts/01_provision_ubuntu.sh) is already looking for the `.rclone.conf` file in the home directory, so you should be ready to go.
+
+**Case 2:** If you don't have a config file to upload and need to configure rclone, ssh into the remote (if you're not still connected) and run
+```
+rclone config
+````
+to perform setup. Further directions are here: https://rclone.org/docs/
+
+**Copying files using rclone**: Once configured, copying files with rclone is fairly straightforward. See https://rclone.org/commands/rclone_copy/, in addition to some specific directions for [Dropbox](https://rclone.org/dropbox/) and [Google Drive](https://rclone.org/drive/) (rclone supports lots of other cloud data storage options, too). As an example, let's assume you had a Dropbox source configured under the name "Dropbox" in your `.rclone.conf` file. (You can use `rclone config show` to get a list of what's currently configured; the name of the source will be in brackets.) You want to copy to your AWS instance the contents of a folder deep within your Dropbox called "F566Euk_R1200Euk," which contains .fastq files. You want to copy the files to a new directory on your remote called "F566Euk_R1200Euk_for_analysis". At the shell prompt (on the remote, of course), you would type:
+```
+rclone copy -v Dropbox:"Path to the/folder/you want/to/copy/F566Euk_R1200Euk/" ~/F566Euk_R1200Euk_for_analysis
+```
+And voilà! The files should now be on your AWS instance in the directory "F566Euk_R1200Euk_for_analysis" to which you copied them. (If any of the directories in the path to your target folder contain spaces, you'll need to put the path in quotes when you call `rclone copy`.) Using the flag `-v` will allow you to track the progress of your file transfer. 
 
 ## Process some data
