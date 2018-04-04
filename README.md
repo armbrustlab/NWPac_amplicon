@@ -85,7 +85,7 @@ source ./02_metagenomics_amplicon_provision.sh
 ```
 Answer yes ("Y") to any prompts.
 
-## Next step: Copying files to the remote client, or allowing the remote to access them
+## Next step: Copying files to the remote client
 
 ### Option 1: Secure copy (scp)
 
@@ -128,5 +128,7 @@ to perform setup. Further directions are here: https://rclone.org/docs/
 rclone copy -v Dropbox:"Path to the/folder/you want/to/copy/F566Euk_R1200Euk/" ~/F566Euk_R1200Euk_for_analysis
 ```
 And voilà! The files should now be on your AWS instance in the directory "F566Euk_R1200Euk_for_analysis" to which you copied them. (If any of the directories in the path to your target folder contain spaces, you'll need to put the path in quotes when you call `rclone copy`.) Using the flag `-v` will allow you to track the progress of your file transfer. 
+
+*A note:* Rclone includes an experimental command [`mount`](https://rclone.org/commands/rclone_mount/) that supposedly lets you mount your cloud storage location directly. I didn't have much luck with this, so I stuck with copying instead. If you can get the [`rclone mount`] to work, I'd love to hear about it.
 
 ## Process some data
