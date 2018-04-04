@@ -43,10 +43,10 @@ git clone https://github.com/jamesrco/NWPac_amplicon NWPac_amplicon
 
 Now, we can change directories to the newly cloned repository and run the provisioning scripts.
 
-The [first script](scripts/01_vagrant_provision_ubuntu.sh) will install unzip and rclone. rclone will be useful if we want to access our .fastq files from a Dropbox or Google Drive location. 
+The [first script](scripts/01_provision_ubuntu.sh) will install unzip and rclone. rclone will be useful if we want to access our .fastq files from a Dropbox or Google Drive location. 
 ```
 cd NWPac_amplicon/scripts
-source ./01_vagrant_provision_ubuntu.sh
+source ./01_provision_ubuntu.sh
 ```
 
 The [second script](scripts/02_metagenomics_amplicon_provision.sh) will install Python 2.7 and the necessary bioinformatics tools, including the Biopython package and mothur.
@@ -78,7 +78,7 @@ At this point, you can connect to the Vagrant box using ssh, install git, use gi
 sudo apt install git
 git clone https://github.com/jamesrco/NWPac_amplicon NWPac_amplicon
 cd NWPac_amplicon/scripts
-source ./01_vagrant_provision_ubuntu.sh
+source ./01_provision_ubuntu.sh
 source ./02_metagenomics_amplicon_provision.sh
 ```
 Answer yes ("Y") to any prompts.
