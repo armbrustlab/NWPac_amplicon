@@ -57,9 +57,12 @@ Answer yes ("Y") to any prompts.
 
 Doing all of this in a Vagrant box on your own computer is useful for testing new features, etc., without having to set up (and pay for) a cloud computing instance. You'll likely never need these directions unless you're developing and testing new shell scripts.
 
-If on a Mac: Install and configure [Vagrant](https://www.vagrantup.com/) using these great directions here: http://sourabhbajaj.com/mac-setup/Vagrant/README.html 
+If on a Mac: Install and configure [Vagrant](https://www.vagrantup.com/) using these great directions here: http://sourabhbajaj.com/mac-setup/Vagrant/README.html. I'd also install the [vagrant-disksize plugin](https://github.com/sprotheroe/vagrant-disksize) because some of the stock box images have insufficient storage space for playing around with sequence data. To install:
+```
+vagrant plugin install vagrant-disksize
+```
 
-Once Vagrant is installed, create a new directory to store your Vagrant "boxes" (essentially machine images). In this directory, get whatever box(es) you want. (The full listing of available boxes is [here](https://app.vagrantup.com/boxes/search).) For Ubuntu 16.04:
+Once Vagrant (and vagrant-disksize) are installed, use Vagrant command `vagrant box add` to add whatever box(es) you want; the full listing of available boxes is [here](https://app.vagrantup.com/boxes/search). I'd recommend also creating a new directory to park your Vagrant init and logfiles. (On a Mac at least, the Vagrant boxes themselves live at `~/.vagrant.d/boxes`.) To add the latest Ubuntu 16.04 box:
 ```
 vagrant box add xenial64 http://files.vagrantup.com/xenial64.box
 ```
