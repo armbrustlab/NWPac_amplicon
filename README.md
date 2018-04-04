@@ -95,11 +95,21 @@ where `/path/to/my-key-pair.pem` is (as above) the path (on *your* computer) to 
 
 To copy the same file to a local Vagrant box, assuming the box can be reached at 127.0.0.1 on port 2222 (the defaults):
 ```
-scp -i /path/to/vagrant/.vagrant/machines/default/virtualbox/private_key -P 2222 /local/path/to/file/SampleFile.txt vagrant@127.0.0.1:/path/to/remote/destination 
+scp -i /path/to/Vagrant/.vagrant/machines/default/virtualbox/private_key -P 2222 /local/path/to/file/SampleFile.txt vagrant@127.0.0.1:/path/to/remote/destination 
 ```
 With Vagrant, scp would not work unless I specified the path to the default Vagrant private key. It should be in the directory `.vagrant`, subordinate to the directory in which you added and initialized your Vagrant box. (Apparently, you can also specify a custom key pair by messing with some Vagrant box settings; I didn't waste my time with this step.)  If you're doing a lot of testing with Vagrant, you might find the instructions (here)[https://superuser.com/questions/317036/ignore-known-hosts-security-in-ssh-for-some-addresses] and (here)[http://www.kevssite.com/how-to-stop-ssh-from-adding-a-server-to-known_hosts-file/] useful to prevent ssh from adding every new Vagrant box to your known hosts lists. I would *not* disable any security features for ssh connections to AWS instances.
 
 ### Option 2: Use rclone to access files directly from the remote client
 
+Another (perhaps easier) option is to use rclone to grab all the .fastq files you will want directly from a Dropbox or Google Drive location. This frees you from having to download all the files onto your computer, zip them into archives, and then manually copy them to the remote, as above.
+
+The [first provisioning script](scripts/01_provision_ubuntu.sh) downloads and installs rclone, so you're already halfway there. Once installed, you'll need to configure things. If you've already configured rclone on your own computer and you will be grabbing .fastq files from one of the locations in your existing rclone configuration, you can simply copy the config file `.rclone.conf` right on over to your remote using **scp**:
+```
+scp -i /path/to/my-key-pair.pem ~/.rclone.conf ubuntu@c2-198-51-100-1.compute-1.amazonaws.com:.
+```
+or, for a Vagrant box, assuming you installed rclone right into your home directory:
+```
+scp -i /path/to/Vagrant/.vagrant/machines/default/virtualbox/private_key -P 2222 ~/.rclone.conf vagrant@127.0.0.1:.
+```
 
 ## Process some data
