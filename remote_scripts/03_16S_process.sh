@@ -135,3 +135,13 @@ echo "Making counts table. Calling Python script to fix mismatches between group
 python2 ${code_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups
 mothur "#count.seqs(name=$(ls -t ${prefix}*.good.names | head -n1), group=$(ls -t ${prefix}*.short.groups | head -n1), processors=${numproc})"
 
+# align to the silva database; reads that mis-align are removed
+echo "Screening sequences based on alignment to silva...."
+mothur "#align.seqs(fasta=$(ls -t *.unique.fasta | head -n1), reference=$V4REF, processors=8)"
+mothur "#summary.seqs(fasta=$(ls -t *.unique.align | head -n1), count=$(ls -t *.good.count_table | head -n1), processors=8)"
+mothur "#screen.seqs(fasta=$(ls -t *.unique.align | head -n1), count=$(ls -t *.good.count_table | head -n1), summary=$(ls -t *.summary | head -n1), optimize=start-end, maxhomop=8, processors=8)"
+mothur "#filter.seqs(fasta=$(ls -t *.good.align | head -n1), vertical=T, trump=., processors=8)"
+mothur "#unique.seqs(fasta=$(ls -t *.filter.fasta | head -n1), count=$(ls -t *.good.count_table | head -n1))"
+mothur "#summary.seqs(fasta=$(ls -t *.fasta | head -n1), processors=8)"
+
+

@@ -5,7 +5,7 @@
 # shell script for installing necessary tools for analysis of 16S/18S amplicon sequence data
 # Jamie Collins, Armbrust Lab, University of Washington; james.r.collins@aya.yale.edu
 
-# assumes we are setting up from scratch on a Ubuntu machine image, perhaps using the script "01_vagrant_provision_ubuntu.sh"
+# assumes we are setting up from scratch on a Ubuntu 16.04 machine image, perhaps using the script "01_vagrant_provision_ubuntu.sh"
 # *** if using AWS: also assumes we've allowed SSH traffic in the security group we used to set up our machine image
 
 # ----------------------------------------------------
@@ -13,10 +13,14 @@
 # ----------------------------------------------------
 
 # ----------------------------------------------------
-# necessary python components 
+# python and necessary components 
 # ----------------------------------------------------
 
-# install pip
+# python 2
+
+sudo apt install python-minimal
+
+# pip
 
 sudo apt-get update && sudo apt-get install python-pip
 
@@ -29,12 +33,10 @@ pip install biopython
 # mothur
 # ----------------------------------------------------
 
-# install dependencies
+# # install dependency: boost (doesn't appear to be necessary on ubuntu)
 
-# boost (will also install python3)
-
-brew install boost
-brew install boost-python
+# brew install boost
+# brew install boost-python
 
 # install mothur itself and add installation directory to path
 
