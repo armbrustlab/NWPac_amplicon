@@ -1,5 +1,5 @@
 # NWPac_amplicon
-Fully reproducible, cloud- or cluster-ready pipeline for workup of 16S/18S amplicon sequence data. Currently configured to process data from three cruises in the NW Pacific Ocean.
+Scripts and other necessary files to build a cloud- or cluster-ready pipeline for workup of 16S/18S amplicon sequence data. The pipeline is designed to be fully reproducible. Currently configured to process data from three cruises in the NW Pacific Ocean.
 
 ## Software we'll need
 These scripts and directions assume you are beginning with a blank machine image -- i.e., with nothing but the operating system and the standard preinstalled packages. Depending on your platform, you may already have some or all of the necessary software installed. If so, go ahead and skip right to the processing scripts. To execute the scripts in this pipeline, you'll need:
@@ -27,13 +27,13 @@ where `/path/my-key-pair.pem` is the path (on *your* computer) to your private k
 
 3. Once you are securely connected to your machine image, it's time to provision it. (Once you are connected to the remote client via SSH, your shell prompt should change from what you're used to seeing to something like `ubuntu@ip-172-31-23-22:~$`) 
 
-First, let's make sure git is installed, since we'll be cloning the scripts in this repository directly to a new repository on the machine image.
+First, let's make sure git is installed, since we'll be cloning the scripts and other files in this repository directly to a new repository on the machine image.
 ```
 sudo apt install git
 ```
 You should receive a message indicating git is already installed; if so, that's great -- but it's worth double-checking.
 
-Next, let's clone a copy of this repository to the machine image. Ths is an easier way of obtaining all the scripts than using secure copy (scp) -- and using git ensures you'll be downloading and using the very latest versions of the scripts maintained here on GitHub. We'll clone the repository into a new local repo of the same name. 
+Next, let's clone a copy of this repository to the machine image. This is an easier way of obtaining all the necessary scripts and files than using secure copy (scp) -- and using git ensures you'll be downloading and using the very latest versions of the scripts/files maintained here on GitHub. We'll clone the repository into a new local repo of the same name. 
 ```
 git clone https://github.com/jamesrco/NWPac_amplicon NWPac_amplicon
 ```
@@ -41,6 +41,12 @@ git clone https://github.com/jamesrco/NWPac_amplicon NWPac_amplicon
 Now, we can change directories to the newly cloned repository and run the provisioning scripts.
 
 The [first script](scripts/01_vagrant_provision_ubuntu.sh) will install unzip and rclone. rclone will be useful if we want to access our .fastq files from a Dropbox or Google Drive location. 
+```
+cd NWPac_amplicon/scripts
+source ./01_vagrant_provision_ubuntu.sh
+```
+
+The [second script](scripts/02_metagenomics_amplicon_provision.sh) will install Python 2.7 and the necessary bioinformatics tools, including the Biopython package and mothur.
 ```
 cd NWPac_amplicon/scripts
 source ./01_vagrant_provision_ubuntu.sh
