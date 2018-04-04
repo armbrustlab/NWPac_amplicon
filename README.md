@@ -30,27 +30,21 @@ First, we'll initialize, start up and provision a cloud computing instance or lo
    ```
    where `/path/to/my-key-pair.pem` is the path (on *your* computer) to your private key file. The private key file is (suprise!) the private half of the key pair you specified or created when you launched the machine image. The next bit (`ubuntu@ec2-198-51-100-1.compute-1.amazonaws.com` in this example) is the username and server address. On a Mac, your ssh keys should be in the .ssh folder in your user directory (`~/.ssh`). You can get get the server address from the information provided for the image in your EC2 console. (Copy the address listed in the column called "Public DNS.") Answer "yes" when SSH asks you if you want to continue connecting; you should then receive a response telling you the AMI has been added to your list of known hosts. Note that you use the username `ubuntu` when connecting to a Ubuntu instance; you would replace the `ubuntu` bit with `ec2-user` if connecting to an Amazon Linux or Red Hat EC2 instance. (A good rundown of these idiosyncracies [can be found here](https://99robots.com/how-to-ssh-to-ec2-instance-on-aws/).)
 
-4. Once you are securely connected to your machine image, it's time to provision it. (Once you are connected to the remote client via SSH, your shell prompt should change from what you're used to seeing to something like `ubuntu@ip-172-31-23-22:~$`) 
-
-First, let's make sure git is installed, since we'll be cloning the scripts and other files in this repository directly to a new repository on the machine image.
+4. Once you are securely connected to your machine image, it's time to provision it. (Once you are connected to the remote client via SSH, your shell prompt should change from what you're used to seeing to something like `ubuntu@ip-172-31-23-22:~$`). First, let's make sure git is installed, since we'll be cloning the scripts and other files in this repository directly to a new repository on the machine image.
    ```
    sudo apt install git
    ```
    You should receive a message indicating git is already installed; if so, that's great -- but it's worth double-checking.
-
    Next, let's clone a copy of this repository to the machine image. This is an easier way of obtaining all the necessary scripts and files than using secure copy (scp) -- and using git ensures you'll be downloading and using the very latest versions of the scripts/files maintained here on GitHub. We'll clone the repository into a new local repo of the same name. 
    ```
    git clone https://github.com/jamesrco/NWPac_amplicon NWPac_amplicon
    ```
 
-5. Now, we can change directories to the newly cloned repository and run the provisioning scripts.
-
-The [first script](scripts/01_provision_ubuntu.sh) will install unzip and rclone. rclone will be useful if we want to access our .fastq files from a Dropbox or Google Drive location. 
+5. Now, we can change directories to the newly cloned repository and run the provisioning scripts. The [first script](scripts/01_provision_ubuntu.sh) will install unzip and rclone. rclone will be useful if we want to access our .fastq files from a Dropbox or Google Drive location. 
    ```
    cd NWPac_amplicon/scripts
    source ./01_provision_ubuntu.sh
    ```
-
    The [second script](scripts/02_metagenomics_amplicon_provision.sh) will install Python 2.7 and the necessary bioinformatics    tools, including the Biopython package and mothur.
    ```
    source ./02_metagenomics_amplicon_provision.sh
@@ -99,7 +93,7 @@ To copy the same file to a local Vagrant box, assuming the box can be reached at
 ```
 scp -i /path/to/Vagrant/.vagrant/machines/default/virtualbox/private_key -P 2222 /local/path/to/file/SampleFile.txt vagrant@127.0.0.1:/path/to/remote/destination 
 ```
-With Vagrant, scp would not work unless I specified the path to the default Vagrant private key. It should be in the directory `.vagrant`, subordinate to the directory in which you added and initialized your Vagrant box. (Apparently, you can also specify a custom key pair by messing with some Vagrant box settings; I didn't waste my time with this step.)  If you're doing a lot of testing with Vagrant, you might find the instructions (here)[https://superuser.com/questions/317036/ignore-known-hosts-security-in-ssh-for-some-addresses] and (here)[http://www.kevssite.com/how-to-stop-ssh-from-adding-a-server-to-known_hosts-file/] useful to prevent ssh from adding every new Vagrant box to your known hosts lists. I would *not* disable any security features for ssh connections to AWS instances.
+With Vagrant, scp would not work unless I specified the path to the default Vagrant private key. It should be in the directory `.vagrant`, subordinate to the directory in which you added and initialized your Vagrant box. (Apparently, you can also specify a custom key pair by messing with some Vagrant box settings; I didn't waste my time with this step.)  If you're doing a lot of testing with Vagrant, you might find the instructions [here](https://superuser.com/questions/317036/ignore-known-hosts-security-in-ssh-for-some-addresses) and [here](http://www.kevssite.com/how-to-stop-ssh-from-adding-a-server-to-known_hosts-file/) useful to prevent ssh from adding every new Vagrant box to your known hosts lists. I would *not* disable any security features for ssh connections to AWS instances.
 
 ### Option 2: Use rclone to access files directly from the remote client
 
