@@ -52,6 +52,7 @@ unzip Mothur.linux_64.zip
 
 cd mothur
 export PATH=$PATH:$(pwd)
+cd ~/
 
 # # option 2: download latest zipball, then compile
 # curl -L https://api.github.com/repos/mothur/mothur/zipball > mothur-latest.tar.gz
