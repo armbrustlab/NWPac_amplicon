@@ -18,11 +18,11 @@
 
 # python 2
 
-sudo apt install python-minimal
+sudo apt install python-minimal -y
 
 # pip
 
-sudo apt-get update && sudo apt-get install python-pip
+sudo apt-get update && sudo apt-get install python-pip -y
 
 # biopython (pip will install numpy as well)
 
