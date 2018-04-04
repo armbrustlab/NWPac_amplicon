@@ -1,8 +1,19 @@
 # NWPac_amplicon
 Fully reproducible, cloud- or cluster-ready pipeline for workup of 16S/18S amplicon sequence data. Currently configured to process data from three cruises in the NW Pacific Ocean.
 
+## Software we'll need
+These scripts and directions assume you are beginning with a blank machine image -- i.e., with nothing but the operating system and the standard preinstalled packages. Depending on your platform, you may already have some or all of the necessary software installed. If so, go ahead and skip right to the processing scripts. To execute the scripts in this pipeline, you'll need:
+
+   * **Python 2.7**, with the **[Biopython package](http://biopython.org/wiki/Download)** and all its dependencies
+   * a working version of **git**
+   * **[mothur](https://www.mothur.org/wiki/Download_mothur)** (may require the package **boost**, depending on your platform)
+   * the ability to execute both **python2** and **mothur** anywhere from the command line (ensure the binaries are in your PATH or you have the appropriate symbolic links)
+   * a configured instance of **rclone**, if you will be accessing your .fastq files from a Dropbox or Google Drive location
+   
+If you don't have some or all of these installed, you don't know what any of this means, or you're starting from scratch: Never fear -- that's what these directions are for.
+
 ## First step: Machine prep and provisioning
-First, we'll initialize, start up and provision a cloud computing instance or local Vagrant box. These scripts and directions assume you are beginning with a blank machine image -- i.e., with nothing but the operating system and the standard preinstalled packages. Depending on your platform, you may already have some or all of the necessary software installed. If so, go ahead and skip right to the one of the processing scripts.
+First, we'll initialize, start up and provision a cloud computing instance or local Vagrant box.
 
 ### Option 1: Use an AWS machine image
 
@@ -25,6 +36,14 @@ You should receive a message indicating git is already installed; if so, that's 
 Next, let's clone a copy of this repository to the machine image. Ths is an easier way of obtaining all the scripts than using secure copy (scp) -- and using git ensures you'll be downloading and using the very latest versions of the scripts maintained here on GitHub. We'll clone the repository into a new local repo of the same name. 
 ```
 git clone https://github.com/jamesrco/NWPac_amplicon NWPac_amplicon
+```
+
+Now, we can change directories to the newly cloned repository and run the provisioning scripts.
+
+The [first script](scripts/01_vagrant_provision_ubuntu.sh) will install unzip and rclone. rclone will be useful if we want to access our .fastq files from a Dropbox or Google Drive location. 
+```
+cd NWPac_amplicon/scripts
+source ./01_vagrant_provision_ubuntu.sh
 ```
 
 ### Option 2: Configure a Vagrant box
