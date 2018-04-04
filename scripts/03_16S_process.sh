@@ -5,6 +5,7 @@
 # a shell script for processing the NWPac 16S amplicon data
 # Jamie Collins, Armbrust Lab, University of Washington; james.r.collins@aya.yale.edu
 # some of this is based on the script "16Smothurpipeline_v2.sh" by Rachelle Lim (formerly in Armbrust Lab)
+# ... and a lot of @rachellelim's pipeline was based on the directions here: https://mothur.org/wiki/MiSeq_SOP
 
 # inputs to this script: raw amplicon sequence files; some file paths in the variables section below
 # outputs: OTU abundance information for input into phyloseq R analyses
@@ -33,7 +34,7 @@ prefix="16S" # file prefix to be appended
 numproc=4 # number of cores/processors for tasks that can be parallelized
 oligos_16S="primers/16S_oligos.fa" # relative path from this script to file containing primer sequences
 maxlength=275 # max sequence length when merged
-# V4REF="/mnt/nfs/home/rlalim/gradientscruise/db/silva.v4.fasta"
+v4ref="databases/silva.v4.fasta" # mothur-compatible reference database for sequence alignment; must be specified unless you want this script to try and retrieve the latest one for you from https://www.mothur.org/wiki/Silva_reference_files
 # DB_REF="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
 # DB_TAX="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
 # TAXNAME="silvaNRv128PR2plusMMETSP"
@@ -43,10 +44,34 @@ maxlength=275 # max sequence length when merged
 # BAD_TAXA="Mitochondria-unknown-Archaea-Eukaryota-Chloroplast"
 
 # ----------------------------------------------------
-# get, store some environment information
+# get, store some environment information and user preferences
 # ----------------------------------------------------
 
 code_dir=$(pwd)
+
+# ask user whether he/she wants to retrieve the latest database from https://www.mothur.org/wiki/Silva_reference_files or use his/her own; if the former, go and fetch the database and get it ready
+while true; do
+    read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you?" yn
+    case $yn in
+        [Yy]* ) genNewrefDB=true;;
+        [Nn]* ) genNewrefDB=false;;
+        * ) echo "Please answer yes or no before proceeding.";;
+    esac
+done
+
+if [ "${genNewrefDB}" == true ]; then
+	
+	# *** if this doesn't work (which is possible, since I'm quite sure there's no API for the mothur wiki page),
+	# user should manually download the latest "Full length sequences and taxonomy references" file from
+	# https://www.mothur.org/wiki/Silva_reference_files
+
+	source ./get_mothurSilvafile.sh
+
+	# now, get the DB set up for processing our 16S data per http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/
+
+	echo $latestDBlink
+
+fi
 
 # ----------------------------------------------------
 # pre-processing/"cleanup" steps
@@ -118,10 +143,11 @@ mothur "#trim.seqs(fasta=$(ls -t ${prefix}*.trim.contigs.fasta | head -n1), olig
 echo "Performing quality filtering..."
 mothur "#screen.seqs(fasta=$(ls -t ${prefix}*.trim.fasta | head -n1), group=$(ls -t ${prefix}*.groups | head -n1),\
  maxambig=0, maxlength=${maxlength}, processors=${numproc})"
-mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1), processors=)"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1), processors=${numproc})"
 
-# collapse duplicate sequences; note that mothur still keeps track of the total counts using the counts table made below,
-# so we're not losing rel. abundance info
+# collapse duplicate sequences; note that we'll still get a list of the total no. of counts 
+# per sequence when we run the count.seqs() command below (results will be in the .count_table)
+# so, we're not losing rel. abundance info
 echo "Finding unique reads..."
 mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1))"
 
@@ -130,14 +156,25 @@ mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1))"
 # our contigs file; we can use a short python script mothur-2-changeGroupFile.py
 # written by @rachellelim to perform the necessary matching
 
-echo "Making counts table. Calling Python script to fix mismatches between groups file and contigs file. You must have Python 2.7 installed, with the package Biopython and its dependencies..."
+echo "Making counts table..."
+echo "First, calling Python script to fix mismatches between groups file and contigs file. You must have Python 2.7 installed, with the package Biopython and its dependencies..."
 # ${code_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups # only works if mothur-2-changeGroupFile.py is executable
 python2 ${code_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups
 mothur "#count.seqs(name=$(ls -t ${prefix}*.good.names | head -n1), group=$(ls -t ${prefix}*.short.groups | head -n1), processors=${numproc})"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.count_table | head -n1), processors=${numproc})" # get some updated information
 
-# align to the silva database; reads that mis-align are removed
-echo "Screening sequences based on alignment to silva...."
-mothur "#align.seqs(fasta=$(ls -t *.unique.fasta | head -n1), reference=$V4REF, processors=8)"
+# ----------------------------------------------------
+# sequence alignment to reference database
+# ----------------------------------------------------
+
+# align our sequences to a 16S V4 region reference database; reads that mis-align will be removed
+# we'll use a version of the Silva database for this task
+
+# assumes user has supplied a reference database (variable "v4ref") or one has been downloaded
+# above from the mothur wiki site
+
+echo "Screening sequences based on alignment to Silva..."
+mothur "#align.seqs(fasta=$(ls -t *.unique.fasta | head -n1), reference=${v4ref}, processors=8)"
 mothur "#summary.seqs(fasta=$(ls -t *.unique.align | head -n1), count=$(ls -t *.good.count_table | head -n1), processors=8)"
 mothur "#screen.seqs(fasta=$(ls -t *.unique.align | head -n1), count=$(ls -t *.good.count_table | head -n1), summary=$(ls -t *.summary | head -n1), optimize=start-end, maxhomop=8, processors=8)"
 mothur "#filter.seqs(fasta=$(ls -t *.good.align | head -n1), vertical=T, trump=., processors=8)"
