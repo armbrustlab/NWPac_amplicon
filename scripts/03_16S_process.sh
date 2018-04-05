@@ -50,12 +50,14 @@ v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference databa
 script_dir=$(pwd) # assuming, of course, that user calls this script from the scripts directory
 
 # ask user whether he/she wants to retrieve the latest database from https://www.mothur.org/wiki/Silva_reference_files or use his/her own; if the former, go and fetch the database and get it ready
-read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you (y/n)?" yn
-case $yn in
-    [Yy]* ) genNewrefDB=true;;
-    [Nn]* ) genNewrefDB=false;;
-    * ) echo "Please answer yes or no before proceeding.";;
-esac
+while true; do
+	read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you?" yn
+	case $yn in
+		[Yy]* ) genNewrefDB=true; return;;
+		[Nn]* ) genNewrefDB=false; return;;
+		* ) echo "Please answer yes or no before proceeding.";;
+	esac
+done
 
 if [ "${genNewrefDB}" == true ]; then
 	
