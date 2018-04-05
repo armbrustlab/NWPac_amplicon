@@ -82,6 +82,9 @@ if [ "${genNewrefDB}" == true ]; then
 	unique.seqs()"
 	# should generate a file ending in something like *.pcr.align
 
+	# get some info about the full (new) ref DB
+	mothur "#summary.seqs(fasta=${v4ref})"
+
 	echo "Reference database ready for use. Proceeding with processing of .fastq files."; echo
 
 	# ensure we use the new reference database we just generated
