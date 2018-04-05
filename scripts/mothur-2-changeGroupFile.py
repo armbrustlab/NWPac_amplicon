@@ -4,7 +4,7 @@
 mothur-2-changeGroupFile.py
 
 Created on Tue Nov  1 16:15:50 2016 by @rachellelim
-Revised on Tue Apr  3 14:12:33 2018 by @jamesco; subsequent version history on GitHub
+Revised on Tue Apr  3 14:12:33 2018 by @jamesrco; subsequent version history on GitHub
 
 @author: rachellelim
 @author: jamesrco
