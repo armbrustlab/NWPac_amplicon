@@ -44,10 +44,12 @@ pip install biopython
 export VERSION=$(curl -s "https://github.com/mothur/mothur/releases/latest" | grep -o 'tag/[v.0-9]*' | awk -F/ '{print $2}')
 
 # ubuntu
+cd ~/
 wget https://github.com//mothur/mothur/releases/download/$VERSION/Mothur.linux_64.zip
 unzip Mothur.linux_64.zip
 
 # # mac
+# cd ~/
 # curl -L https://github.com//mothur/mothur/releases/download/$VERSION/Mothur.mac_64.OSX-10.12.zip | tar -xz
 
 cd mothur
