@@ -23,7 +23,7 @@ latestDBlink=$(curl https://www.mothur.org/wiki/Silva_reference_files | grep -Eo
 
 # test to make sure we got something
 
-if [ ! -n "${latestDBlink}" ];
+if [ ! -n "${latestDBlink}" ]; then
 	# we didn't get anything; let user know 
 	echo "Unable to find any new database files on the mothur wiki site."
 	echo "You might want to check that the script is matching patterns correctly, and that the wiki page hasn't moved. If you didn't supply your own database file, the sequence alignment step later in the pipeline will fail."
