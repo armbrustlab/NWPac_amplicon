@@ -84,8 +84,8 @@ if [ "${genNewrefDB}" == true ]; then
 
 	echo "Reference database ready for use. Proceeding with processing of .fastq files."; echo
 
-	# ensure we use the new reference database
-	v4ref=$(echo "${Silva_alignFile%.align}.pcr.align")
+	# ensure we use the new reference database we just generated
+	v4ref=$(ls -t ${Silva_alignFile%.align}.pcr.align | head -n1)
 
 elif [ "${genNewrefDB}" == false ]; then
 
