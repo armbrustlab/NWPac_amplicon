@@ -16,7 +16,7 @@
 # ----------------------------------------------------
 
 echo "Attempting to retrieve the latest mothur-compatible Silva reference database from the mothur wiki page..."
-echo "If this fails, you should download the latest 'Full length sequences and taxonomy references' file from the wiki yourself and supply it as the V4 references file..."
+echo "If this fails, you should download the latest 'Full length sequences and taxonomy references' file from the wiki yourself and supply it as the 'v4ref' V4 references file..."; echo
 
 # attempt to find the link to the latest full reference file from https://www.mothur.org/wiki/Silva_reference_files, then download it
 latestDBlink=$(curl https://www.mothur.org/wiki/Silva_reference_files | grep -Eoi '<a [^>]+>' |  grep -Eo 'href="[^\"]+"' |  grep -Eo '(((http|https)://)|/).*Silva\.nr_v.*\.tgz' | head -1)
@@ -38,6 +38,6 @@ if [ ! -d ~/databases ]; then
   mkdir ~/databases
 fi
 
-echo "Downloading latest mothur-compatible Silva database from ${latestDBlink} ..."
+echo; echo "Downloading latest mothur-compatible Silva database from ${latestDBlink} ..."
 wget $latestDBlink -P ~/databases/ # if on a mac, try curl -L instead of wget
 tar -xvzf ~/databases/$(basename "$latestDBlink") -C ~/databases/ # this may require a lot of disk space
