@@ -82,7 +82,7 @@ if [ "${genNewrefDB}" == true ]; then
 	unique.seqs()"
 	# should generate a file ending in something like *.pcr.align
 
-	echo "Reference database ready for use. Proceeding with processing of .fastq files."
+	echo "Reference database ready for use. Proceeding with processing of .fastq files."; echo
 
 	# ensure we use the new reference database
 	v4ref=$(echo "${Silva_alignFile%.align}.pcr.align")
