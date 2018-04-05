@@ -82,13 +82,13 @@ if [ "${genNewrefDB}" == true ]; then
 	# should generate a file ending in something like *.pcr.align
 
 	# ensure we set variable 'v4ref' to point to the new reference database we just generated
-	v4ref=$(ls -t ${Silva_alignFile%.align}.pcr.align | head -n1)
+	v4ref=$(ls -lrt -d -1 "${PWD}"/${Silva_alignFile%.align}.pcr.align | head -n1)
 
 	# get some info about the full (new) ref DB
-	mothur "#summary.seqs(fasta=${v4ref})"
+	mothur "#summary.seqs(fasta='${v4ref}')"
 
 	# get some summary info about the reference file containing unique seqs
-	mothur "#summary.seqs(fasta=$(ls -t ${Silva_alignFile%.align}.pcr.unique.align | head -n1))"
+	mothur "#summary.seqs(fasta='$(ls -lrt -d -1 "${PWD}"/${Silva_alignFile%.align}.pcr.unique.align | head -n1)')"
 
 	echo "Reference database ready for use. Proceeding with processing of .fastq files."; echo
 
@@ -199,12 +199,12 @@ mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.count_table | head -n1)
 # assumes user has supplied a reference database (variable "supplied_v4ref") or one has been downloaded
 # above from the mothur wiki site
 
-echo "Screening sequences based on alignment to Silva..."
-mothur "#align.seqs(fasta=$(ls -t *.unique.fasta | head -n1), reference=${v4ref}, processors=8)"
-mothur "#summary.seqs(fasta=$(ls -t *.unique.align | head -n1), count=$(ls -t *.good.count_table | head -n1), processors=8)"
-mothur "#screen.seqs(fasta=$(ls -t *.unique.align | head -n1), count=$(ls -t *.good.count_table | head -n1), summary=$(ls -t *.summary | head -n1), optimize=start-end, maxhomop=8, processors=8)"
-mothur "#filter.seqs(fasta=$(ls -t *.good.align | head -n1), vertical=T, trump=., processors=8)"
-mothur "#unique.seqs(fasta=$(ls -t *.filter.fasta | head -n1), count=$(ls -t *.good.count_table | head -n1))"
-mothur "#summary.seqs(fasta=$(ls -t *.fasta | head -n1), processors=8)"
+echo "Screening sequences based on alignment to Silva. Using reference database ${v4ref} ..."
+mothur "#align.seqs(fasta=$(ls -t ${prefix}*.good.unique.fasta | head -n1), reference='${v4ref}', processors=${numproc})"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.unique.align | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1), processors=${numproc})"
+mothur "#screen.seqs(fasta=$(ls -t ${prefix}*.unique.align | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1), summary=$(ls -t ${prefix}*.summary | head -n1), optimize=start-end, maxhomop=8, processors=${numproc})"
+mothur "#filter.seqs(fasta=$(ls -t ${prefix}*.good.align | head -n1), vertical=T, trump=., processors=${numproc})"
+mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.filter.fasta | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1))"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.fasta | head -n1), processors=${numproc})"
 
 
