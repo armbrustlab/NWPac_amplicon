@@ -29,16 +29,21 @@
 # ----------------------------------------------------
 
 file_dir="/Users/jamesrco/Dropbox/Archived science projects & data/Projects & science data/2018/NWPac 16S & 18S/fastq/"
-# top-level directory under which all .fastq files reside; this is also where mothur output will be dumped
+# top-level directory under which all .fastq files reside; this is also where mothur output will be
+# dumped
 prefix="16S" # file prefix to be appended
 numproc=4 # number of cores/processors for tasks that can be parallelized
 oligos_16S="../primers/16S_oligos.fa" # path to file containing primer sequences
 maxlength=275 # max sequence length when merged
-v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence alignment; must be specified unless you want this script to try and retrieve the latest one for you from https://www.mothur.org/wiki/Silva_reference_files
-# DB_REF="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
-# DB_TAX="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
+supplied_v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence
+                                             # alignment; must be specified unless you want this script
+                                             # to try and retrieve the latest one for you from
+                                             # https://www.mothur.org/wiki/Silva_reference_files
+# supplied_DB_ref="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
+# supplied_DB_tax="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
 # TAXNAME="silvaNRv128PR2plusMMETSP"
-# CLASS_CUTOFF=60 #bootstrap value for classification against the reference db at which the taxonomy is deemed valid
+# CLASS_CUTOFF=60 # bootstrap value for classification against the reference db at which the taxonomy 
+                  # is deemed valid
 # OTU_CUTOFF=0.03 #percent similarity at which we want to cluster OTUs
 # MAXLENGTH=275 #max sequence length when merged
 # BAD_TAXA="Mitochondria-unknown-Archaea-Eukaryota-Chloroplast"
@@ -51,7 +56,7 @@ script_dir=$(pwd) # assuming, of course, that user calls this script from the sc
 
 # ask user whether he/she wants to retrieve the latest database from https://www.mothur.org/wiki/Silva_reference_files or use his/her own; if the former, go and fetch the database and get it ready
 while true; do
-	read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you? " yn
+	read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you? [Y/n] " yn
 	case $yn in
 		[Yy]* ) genNewrefDB=true; break;;
 		[Nn]* ) genNewrefDB=false; break;;
@@ -76,7 +81,17 @@ if [ "${genNewrefDB}" == true ]; then
 	mothur "#pcr.seqs(fasta=${Silva_alignFile}, start=11894, end=25319, keepdots=F, processors=${numproc});
 	unique.seqs()"
 
-	echo "Database ready for use. Proceeding with processing of fastq files."
+	echo "Reference database ready for use. Proceeding with processing of .fastq files."
+
+	# ensure we use the new reference database
+
+	v4ref=dd
+
+elif [ "${genNewrefDB}" == false ]; then
+
+	# user wants to use a supplied database
+
+	v4ref="${supplied_v4ref}"
 
 fi
 
@@ -177,7 +192,7 @@ mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.count_table | head -n1)
 # align our sequences to a 16S V4 region reference database; reads that mis-align will be removed
 # we'll use a version of the Silva database for this task
 
-# assumes user has supplied a reference database (variable "v4ref") or one has been downloaded
+# assumes user has supplied a reference database (variable "supplied_v4ref") or one has been downloaded
 # above from the mothur wiki site
 
 echo "Screening sequences based on alignment to Silva..."
