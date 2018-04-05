@@ -65,11 +65,18 @@ if [ "${genNewrefDB}" == true ]; then
 	# user should manually download the latest "Full length sequences and taxonomy references" file from
 	# https://www.mothur.org/wiki/Silva_reference_files
 
-	source ./get_mothurSilvafile.sh
+	source ${code_dir}/get_mothurSilvafile.sh
 
 	# now, get the DB set up for processing our 16S data per http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/
 
-	echo $latestDBlink
+	cd ~/databases/
+	Silva_alignFile=$(ls -t | egrep '(Silva|silva)\.nr_v.*align' | head -n1)
+	echo "Extracting 16S V4 subset from mothur-compatible Silva reference database ${Silva_alignFile} ..."
+
+	mothur "#pcr.seqs(fasta=${Silva_alignFile}, start=11894, end=25319, keepdots=F, processors=${numproc});
+	unique.seqs()"
+
+	echo "Database ready for use. Proceeding with processing of fastq files."
 
 fi
 

@@ -34,14 +34,6 @@ if echo "${latestDBlink}" | grep -q '^/.*Silva\.nr_v.*\.tgz'; then
 	latestDBlink="https://www.mothur.org${latestDBlink}"
 fi
 
-latestDBtarfile=$(echo "${latestDBlink}" | grep -Eo 'Silva\.nr_v.*\.tgz')
-latestDBdir=$(echo "${latestDBlink}" | grep -Eo 'Silva\.nr_v[0-9]{3}')
-
-echo "Downloading latest mothur-compatible Silva database file from ${latestDBlink} ..."
-wget $latestDBlink -P databases/ # if on a mac, try curl -L instead of wget
-tar -xvzf databases/$(basename "$latestDBlink")
-
-
-
-export latestDBlink
-
+echo "Downloading latest mothur-compatible Silva database from ${latestDBlink} ..."
+wget $latestDBlink -P ~/databases/ # if on a mac, try curl -L instead of wget
+tar -xvzf ~/databases/$(basename "$latestDBlink") -C ~/databases/ # this may require a lot of disk space
