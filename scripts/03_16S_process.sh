@@ -52,7 +52,7 @@ script_dir=$(pwd) # assuming, of course, that user calls this script from the sc
 # ask user whether he/she wants to retrieve the latest database from https://www.mothur.org/wiki/Silva_reference_files or use his/her own; if the former, go and fetch the database and get it ready
 while true; do
 	read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you? " yn
-	case
+	case $yn in
 		[Yy]* ) genNewrefDB=true; break;;
 		[Nn]* ) genNewrefDB=false; break;;
 		* ) echo "Please answer (Y)es or (n)o before proceeding.";;
