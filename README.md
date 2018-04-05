@@ -132,6 +132,52 @@ And voilà! The files should now be on your AWS instance in the directory "F566E
 
 ## Process some data
 
+At this point, we should have an complete environment capable of processing whatever amplicon sequence data we want to throw at it. Assuming you are still connected to your remote, let's move to the `scripts` subdirectory in the repository we cloned from GitHub:
 ```
 cd ~/NWPac_amplicon/scripts/
 ```
+
+We've already run the first two scripts in this directory to get our environment set up; now we'll make use of the others to process our data. Much of the pipeline written into the scripts is based on the [mothur team's example MiSeq SOP](https://mothur.org/wiki/MiSeq_SOP), with some additional guidance [from this blog post](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/).
+
+The main processing script ([03_16S_process.sh](scripts/03_16S_process.sh)) will allow you to process 16S amplicon sequence .fastq data residing in one or more directories subordinate to any file path you specify. If you do have data in a number of different directories, note that these will be combined about a quarter of the way into the process. (If you want to process segments of your data separately for some reason, remember to point the script at only the specific directory of interest.)
+
+Before we can run our script, we need to set some variables and file paths. We'll do this by editing the values of several variables within the following section of the processing script [03_16S_process.sh](scripts/03_16S_process.sh):  
+```
+# ----------------------------------------------------
+# specify some file locations and other variables
+# ----------------------------------------------------
+
+file_dir="/Users/jamesrco/Dropbox/Archived science projects & data/Projects & science data/2018/NWPac 16S & 18S/fastq/"
+# top-level directory under which all .fastq files reside; this is also where mothur output will be
+# dumped
+prefix="16S" # file prefix to be appended
+numproc=4 # number of cores/processors for tasks that can be parallelized
+oligos_16S="../primers/16S_oligos.fa" # path to file containing primer sequences
+maxlength=275 # max sequence length when merged
+supplied_v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence
+                                             # alignment; must be specified unless you want this script
+                                             # to try and retrieve the latest one for you from
+                                             # https://www.mothur.org/wiki/Silva_reference_files
+# supplied_DB_ref="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
+# supplied_DB_tax="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
+# TAXNAME="silvaNRv128PR2plusMMETSP"
+# CLASS_CUTOFF=60 # bootstrap value for classification against the reference db at which the taxonomy 
+                  # is deemed valid
+# OTU_CUTOFF=0.03 #percent similarity at which we want to cluster OTUs
+# MAXLENGTH=275 #max sequence length when merged
+# BAD_TAXA="Mitochondria-unknown-Archaea-Eukaryota-Chloroplast"
+```
+You can edit the script on GitHub or on your own computer before you clone the repository to the remote. If you choose to set things up in advance this way, use a fork of the main repository; there's no need to commit your changes to scripts in the master branch unless making functional changes to the code. You could create a fork each time you run the pipeline, which will allow you to save the parameters and scripts you used such that you (or anyone else) could reproduce your results exactly. Alternatively, you can set the values of your variables by editing the script file directly once it's on the remote client. The comments following each variable are self-explanatory. Some of the "default" values for the numeric parameters are drawn from [this example pipeline](https://mothur.org/wiki/MiSeq_SOP).
+
+Once you've got everything set the way you want it (and, of course, you've transferred your data files to the location on the remote you've specified for `file_dir`), you should be ready to run the script. Double-check to make sure you've specifed all the necessary file paths correctly, or plan to check back on the progress of your run frequently to make sure the script hasn't thrown an error. (The latter is best practice anyway.) We can run the script by sourcing it at the command line from within the `scripts` directory:
+```
+source ./03_16S_process.sh
+```
+Before you disconnect from your remote and walk away, you will be asked for input at one interactive prompt:
+```
+Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you? [Y/n] 
+```
+Based on your response, 03_16S_process.sh will either use the reference database and taxonomy files you've uploaded yourself (paths specified for `supplied_v4ref`, `supplied_DB_ref`, and `supplied_DB_tax`) **or** the helper script [get_mothurSilvafile.sh](scripts/get_mothurSilvafile.sh) will attempt to download the latest mothur-compatible Silva reference database automatically from the [mothur wiki site](https://www.mothur.org/wiki/Silva_reference_files) and then perform some necessary extractions and conversions.
+
+As the script runs, it will perform a variety of tasks using shell functions, the mothur package, and Python. As different mothur functions are called, a series of data objects will be created in the top-level directory (i.e., your `file_dir`). In addition, mothur will create and write to the same directory a series of log files for each function call.
+
