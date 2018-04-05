@@ -78,17 +78,19 @@ if [ "${genNewrefDB}" == true ]; then
 	Silva_alignFile=$(ls -t | egrep '(Silva|silva)\.nr_v.*align' | head -n1)
 	echo; echo "Extracting 16S V4 subset from mothur-compatible Silva reference database '${Silva_alignFile}'..."
 
-	mothur "#pcr.seqs(fasta=${Silva_alignFile}, start=11894, end=25319, keepdots=F, processors=${numproc});
-	unique.seqs()"
+	mothur "#pcr.seqs(fasta=${Silva_alignFile}, start=11894, end=25319, keepdots=F, processors=${numproc});unique.seqs()"
 	# should generate a file ending in something like *.pcr.align
+
+	# ensure we set variable 'v4ref' to point to the new reference database we just generated
+	v4ref=$(ls -t ${Silva_alignFile%.align}.pcr.align | head -n1)
 
 	# get some info about the full (new) ref DB
 	mothur "#summary.seqs(fasta=${v4ref})"
 
-	echo "Reference database ready for use. Proceeding with processing of .fastq files."; echo
+	# get some summary info about the reference file containing unique seqs
+	mothur "#summary.seqs(fasta=$(ls -t ${Silva_alignFile%.align}.pcr.unique.align | head -n1))"
 
-	# ensure we use the new reference database we just generated
-	v4ref=$(ls -t ${Silva_alignFile%.align}.pcr.align | head -n1)
+	echo "Reference database ready for use. Proceeding with processing of .fastq files."; echo
 
 elif [ "${genNewrefDB}" == false ]; then
 
