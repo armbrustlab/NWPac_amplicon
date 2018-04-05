@@ -181,3 +181,5 @@ Based on your response, 03_16S_process.sh will either use the reference database
 
 As the script runs, it will perform a variety of tasks using shell functions, the mothur package, and Python. As different mothur functions are called, a series of data objects will be created in the top-level directory (i.e., your `file_dir`). In addition, mothur will create and write to the same directory a series of log files for each function call.
 
+***Important note:** The function calls in [03_16S_process.sh](scripts/03_16S_process.sh) use files created in specific previous step(s) as input, assuming all the steps were performed in a certain order. A combination of filename pattern matching the file modification time are used to determine which files will be used for which function calls. Because of this, it's important you don't modify or remove any of the files created by mothur until the script has finished running; otherwise, the script might use the wrong file(s) as input, producing incorrect or unexpected results.*
+
