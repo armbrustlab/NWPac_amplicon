@@ -80,17 +80,16 @@ if [ "${genNewrefDB}" == true ]; then
 
 	mothur "#pcr.seqs(fasta=${Silva_alignFile}, start=11894, end=25319, keepdots=F, processors=${numproc});
 	unique.seqs()"
+	# should generate a file ending in something like *.pcr.align
 
 	echo "Reference database ready for use. Proceeding with processing of .fastq files."
 
 	# ensure we use the new reference database
-
-	v4ref=dd
+	v4ref=$(echo "${Silva_alignFile%.align}.pcr.align")
 
 elif [ "${genNewrefDB}" == false ]; then
 
 	# user wants to use a supplied database
-
 	v4ref="${supplied_v4ref}"
 
 fi
