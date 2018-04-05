@@ -148,16 +148,21 @@ Before we can run our script, we need to set some variables and file paths. We'l
 # ----------------------------------------------------
 
 file_dir="/Users/jamesrco/Dropbox/Archived science projects & data/Projects & science data/2018/NWPac 16S & 18S/fastq/"
-# top-level directory under which all .fastq files reside; this is also where mothur output will be dumped
+# top-level directory under which all .fastq files reside; this is also where mothur output will be
+# dumped
 prefix="16S" # file prefix to be appended
 numproc=4 # number of cores/processors for tasks that can be parallelized
 oligos_16S="../primers/16S_oligos.fa" # path to file containing primer sequences
 maxlength=275 # max sequence length when merged
-v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence alignment; must be specified unless you want this script to try and retrieve the latest one for you from https://www.mothur.org/wiki/Silva_reference_files
+v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence alignment;
+                                    # must be specified unless you want this script to try and retrieve
+                                    # the latest one for you from
+                                    # https://www.mothur.org/wiki/Silva_reference_files
 # DB_REF="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
 # DB_TAX="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
 # TAXNAME="silvaNRv128PR2plusMMETSP"
-# CLASS_CUTOFF=60 #bootstrap value for classification against the reference db at which the taxonomy is deemed valid
+# CLASS_CUTOFF=60 # bootstrap value for classification against the reference db at which the taxonomy 
+                  # is deemed valid
 # OTU_CUTOFF=0.03 #percent similarity at which we want to cluster OTUs
 # MAXLENGTH=275 #max sequence length when merged
 # BAD_TAXA="Mitochondria-unknown-Archaea-Eukaryota-Chloroplast"
