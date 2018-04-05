@@ -51,7 +51,7 @@ script_dir=$(pwd) # assuming, of course, that user calls this script from the sc
 
 # ask user whether he/she wants to retrieve the latest database from https://www.mothur.org/wiki/Silva_reference_files or use his/her own; if the former, go and fetch the database and get it ready
 read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you (y/n)?" yn
-case "${yn}" in
+case $yn in
     [Yy]* ) genNewrefDB=true;;
     [Nn]* ) genNewrefDB=false;;
     * ) echo "Please answer yes or no before proceeding.";;
@@ -69,7 +69,7 @@ if [ "${genNewrefDB}" == true ]; then
 
 	cd ~/databases/
 	Silva_alignFile=$(ls -t | egrep '(Silva|silva)\.nr_v.*align' | head -n1)
-	echo "Extracting 16S V4 subset from mothur-compatible Silva reference database ${Silva_alignFile} ..."
+	echo "Extracting 16S V4 subset from mothur-compatible Silva reference database '${Silva_alignFile}'..."
 
 	mothur "#pcr.seqs(fasta=${Silva_alignFile}, start=11894, end=25319, keepdots=F, processors=${numproc});
 	unique.seqs()"
