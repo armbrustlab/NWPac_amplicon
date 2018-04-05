@@ -76,7 +76,7 @@ if [ "${genNewrefDB}" == true ]; then
 
 	cd ~/databases/
 	Silva_alignFile=$(ls -t | egrep '(Silva|silva)\.nr_v.*align' | head -n1)
-	echo "Extracting 16S V4 subset from mothur-compatible Silva reference database '${Silva_alignFile}'..."
+	echo; echo "Extracting 16S V4 subset from mothur-compatible Silva reference database '${Silva_alignFile}'..."
 
 	mothur "#pcr.seqs(fasta=${Silva_alignFile}, start=11894, end=25319, keepdots=F, processors=${numproc});
 	unique.seqs()"
