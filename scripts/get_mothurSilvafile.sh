@@ -39,5 +39,5 @@ if [ ! -d ~/databases ]; then
 fi
 
 echo; echo "Downloading latest mothur-compatible Silva database from ${latestDBlink} ..."; echo
-wget $latestDBlink -P ~/databases/ # if on a mac, try curl -L instead of wget
+wget $latestDBlink -P ~/databases/ # if on a mac, try cd ~/databases/; curl $latestDBlink -O instead of wget
 tar -xvzf ~/databases/$(basename "$latestDBlink") -C ~/databases/ # this may require a lot of disk space
