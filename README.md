@@ -131,3 +131,7 @@ And voilà! The files should now be on your AWS instance in the directory "F566E
 *A note:* Rclone includes an experimental command [`mount`](https://rclone.org/commands/rclone_mount/) that supposedly lets you mount your cloud storage location directly. I didn't have much luck with this, so I stuck with copying instead. If you can get `rclone mount` to work, I'd love to hear about it.
 
 ## Process some data
+
+```
+cd ~/NWPac_amplicon/scripts/
+```
