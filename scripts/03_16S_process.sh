@@ -32,9 +32,9 @@ file_dir="/Users/jamesrco/Dropbox/Archived science projects & data/Projects & sc
 # top-level directory under which all .fastq files reside; this is also where mothur output will be dumped
 prefix="16S" # file prefix to be appended
 numproc=4 # number of cores/processors for tasks that can be parallelized
-oligos_16S="primers/16S_oligos.fa" # relative path from this script to file containing primer sequences
+oligos_16S="../primers/16S_oligos.fa" # path to file containing primer sequences
 maxlength=275 # max sequence length when merged
-v4ref="databases/silva.v4.fasta" # mothur-compatible reference database for sequence alignment; must be specified unless you want this script to try and retrieve the latest one for you from https://www.mothur.org/wiki/Silva_reference_files
+v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence alignment; must be specified unless you want this script to try and retrieve the latest one for you from https://www.mothur.org/wiki/Silva_reference_files
 # DB_REF="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
 # DB_TAX="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
 # TAXNAME="silvaNRv128PR2plusMMETSP"
@@ -47,17 +47,15 @@ v4ref="databases/silva.v4.fasta" # mothur-compatible reference database for sequ
 # get, store some environment information and user preferences
 # ----------------------------------------------------
 
-code_dir=$(pwd)
+script_dir=$(pwd) # assuming, of course, that user calls this script from the scripts directory
 
 # ask user whether he/she wants to retrieve the latest database from https://www.mothur.org/wiki/Silva_reference_files or use his/her own; if the former, go and fetch the database and get it ready
-while true; do
-    read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you?" yn
-    case $yn in
-        [Yy]* ) genNewrefDB=true;;
-        [Nn]* ) genNewrefDB=false;;
-        * ) echo "Please answer yes or no before proceeding.";;
-    esac
-done
+read -p "Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you (y/n)?" yn
+case "${yn}" in
+    [Yy]* ) genNewrefDB=true;;
+    [Nn]* ) genNewrefDB=false;;
+    * ) echo "Please answer yes or no before proceeding.";;
+esac
 
 if [ "${genNewrefDB}" == true ]; then
 	
@@ -65,7 +63,7 @@ if [ "${genNewrefDB}" == true ]; then
 	# user should manually download the latest "Full length sequences and taxonomy references" file from
 	# https://www.mothur.org/wiki/Silva_reference_files
 
-	source ${code_dir}/get_mothurSilvafile.sh
+	source ${script_dir}/get_mothurSilvafile.sh
 
 	# now, get the DB set up for processing our 16S data per http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/
 
@@ -143,7 +141,7 @@ mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.contigs.fasta | head -n1), p
 
 # remove primers; reads with at least one mismatch to either of the primers are discarded as *.scrap.fasta
 echo "Removing primers..."
-mothur "#trim.seqs(fasta=$(ls -t ${prefix}*.trim.contigs.fasta | head -n1), oligos = $code_dir/$oligos_16S, checkorient = T,\
+mothur "#trim.seqs(fasta=$(ls -t ${prefix}*.trim.contigs.fasta | head -n1), oligos = $oligos_16S, checkorient = T,\
  processors=${numproc})"
 
 # perform quality filtering; reads with any ambiguous bases or that are too long (i.e., not merged properly) are discarded
@@ -166,7 +164,7 @@ mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.trim.good.fasta | head -n1))"
 echo "Making counts table..."
 echo "First, calling Python script to fix mismatches between groups file and contigs file. You must have Python 2.7 installed, with the package Biopython and its dependencies..."
 # ${code_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups # only works if mothur-2-changeGroupFile.py is executable
-python2 ${code_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups
+python2 ${script_dir}/mothur-2-changeGroupFile.py $(ls -t ${prefix}*.good.fasta | head -n1) $(ls -t ${prefix}*.good.groups | head -n1) ${prefix}.stabilityfile.contigs.good.short.groups
 mothur "#count.seqs(name=$(ls -t ${prefix}*.good.names | head -n1), group=$(ls -t ${prefix}*.short.groups | head -n1), processors=${numproc})"
 mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.count_table | head -n1), processors=${numproc})" # get some updated information
 
