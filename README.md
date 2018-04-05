@@ -154,12 +154,12 @@ prefix="16S" # file prefix to be appended
 numproc=4 # number of cores/processors for tasks that can be parallelized
 oligos_16S="../primers/16S_oligos.fa" # path to file containing primer sequences
 maxlength=275 # max sequence length when merged
-v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence alignment;
-                                    # must be specified unless you want this script to try and retrieve
-                                    # the latest one for you from
-                                    # https://www.mothur.org/wiki/Silva_reference_files
-# DB_REF="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
-# DB_TAX="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
+supplied_v4ref="../databases/silva.v4.fasta" # path to mothur-compatible reference database for sequence
+                                             # alignment; must be specified unless you want this script
+                                             # to try and retrieve the latest one for you from
+                                             # https://www.mothur.org/wiki/Silva_reference_files
+# supplied_DB_ref="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.fna"
+# supplied_DB_tax="/mnt/nfs/home/rlalim/gradientscruise/db/silvaNRv128PR2plusMMETSP.taxonomy"
 # TAXNAME="silvaNRv128PR2plusMMETSP"
 # CLASS_CUTOFF=60 # bootstrap value for classification against the reference db at which the taxonomy 
                   # is deemed valid
@@ -177,7 +177,7 @@ Before you disconnect from your remote and walk away, you will be asked for inpu
 ```
 Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you? [Y/n] 
 ```
-Based on your response, 03_16S_process.sh will either use the reference database and taxonomy files you've uploaded yourself (paths specified for `v4ref`, `DB_ref`, and `DB_tax`) **or** the helper script [get_mothurSilvafile.sh](scripts/get_mothurSilvafile.sh) will attempt to download the latest mothur-compatible Silva reference database automatically from the [mothur wiki site](https://www.mothur.org/wiki/Silva_reference_files) and then perform some necessary extractions and conversions.
+Based on your response, 03_16S_process.sh will either use the reference database and taxonomy files you've uploaded yourself (paths specified for `supplied_v4ref`, `supplied_DB_ref`, and `supplied_DB_tax`) **or** the helper script [get_mothurSilvafile.sh](scripts/get_mothurSilvafile.sh) will attempt to download the latest mothur-compatible Silva reference database automatically from the [mothur wiki site](https://www.mothur.org/wiki/Silva_reference_files) and then perform some necessary extractions and conversions.
 
 As the script runs, it will perform a variety of tasks using shell functions, the mothur package, and Python. As different mothur functions are called, a series of data objects will be created in the top-level directory (i.e., your `file_dir`). In addition, mothur will create and write to the same directory a series of log files for each function call.
 
