@@ -191,7 +191,7 @@ source ./03_16S_process.sh
 ```
 ... except this time, we're in a screen from which we can "detach" ourselves. Once you see that things are running properly (and have answered yes or no to the prompt described below), we can detach from the screen by typing
 
-**Ctrl** + **b** and then **d**
+<kbd>Ctrl</kbd>+<kbd>b</kbd> and then <kbd>d</kbd>
 
 We are now back out at our shell prompt... but the script is still doing its magic in the background! Upon detaching, you will receive some sort of message like this:
 ```
