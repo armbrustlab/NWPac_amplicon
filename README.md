@@ -177,7 +177,7 @@ Once you've got everything set the way you want it (and, of course, you've trans
 ```
 source ./03_16S_process.sh
 ```
-This will work fine, *except you'll have to remain connected to the remote instance to keep the processes running.* If you want to be able to disconnect from the remote while your script runs, you'll have to run things in a "screen."
+This will work fine, *except you'll have to remain connected to the remote instance to keep the processes running.* If you want to be able to disconnect from the remote while your script runs, you'll have to run things in a "screen." (We'll use **tmux** instead of **screen**, so techincally, we'll be in a "tmux session" than a screen.)
 
 ### Running things so you can actually disconnect from the remote computer: Setting up a screen
 
@@ -203,6 +203,8 @@ exit
 ```
 ... and voilà! You should be back at the command line on your own computer.
 
+### Reconnecting to our tmux session
+
 To reconnect to the remote (and check our progress/run some more scripts/collect our output), open a shell window on your computer and connect via ssh, using the same directions as above. Once reconnected to the remote, we can open up the screen from which detached earlier by calling **tmux** again, this time using `a -t` for `attach` by name:
 ```
 tmux a -t myname
@@ -215,7 +217,7 @@ and then pick out the right session number to use in the attach command.
 
 Once reattached, you should see the commands in your script progressing along (or stopped on some sort of error, or, if you're *really* lucky, done processing). To detach again, simply use the same key combination as above.
 
-There is a (good tmux cheatsheet here)[https://gist.github.com/henrik/1967800].
+There is a [good tmux cheatsheet here](https://gist.github.com/henrik/1967800).
 
 ### Some general notes, whether you run things in a screen or not
 
