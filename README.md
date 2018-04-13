@@ -132,7 +132,7 @@ And voilà! The files should now be on your AWS instance in the directory "F566E
 
 ## Process some data
 
-At this point, we should have an complete environment capable of processing whatever amplicon sequence data we want to throw at it. Assuming you are still connected to your remote, let's move to the `scripts` subdirectory in the repository we cloned from GitHub:
+At this point, we should have a complete environment capable of processing whatever amplicon sequence data we want to throw at it. Assuming you are still connected to your remote, let's move to the `scripts` subdirectory in the repository we cloned from GitHub:
 ```
 cd ~/NWPac_amplicon/scripts/
 ```
