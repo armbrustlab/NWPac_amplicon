@@ -201,10 +201,29 @@ mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.trim.good.count_table | head -n1)
 
 echo "Screening sequences based on alignment to Silva. Using reference database ${v4ref} ..."
 mothur "#align.seqs(fasta=$(ls -t ${prefix}*.good.unique.fasta | head -n1), reference='${v4ref}', processors=${numproc})"
-mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.unique.align | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1), processors=${numproc})"
-mothur "#screen.seqs(fasta=$(ls -t ${prefix}*.unique.align | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1), summary=$(ls -t ${prefix}*.summary | head -n1), optimize=start-end, maxhomop=8, processors=${numproc})"
-mothur "#filter.seqs(fasta=$(ls -t ${prefix}*.good.align | head -n1), vertical=T, trump=., processors=${numproc})"
-mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.filter.fasta | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1))"
-mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.fasta | head -n1), processors=${numproc})"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.good.unique.align | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1), processors=${numproc})"
+mothur "#screen.seqs(fasta=$(ls -t ${prefix}*.good.unique.align | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1), summary=$(ls -t ${prefix}*.good.unique.summary | head s-n1), optimize=start-end, maxhomop=8, processors=${numproc})"
+mothur "#filter.seqs(fasta=$(ls -t ${prefix}*.good.unique.good.align | head -n1), vertical=T, trump=., processors=${numproc})"
+mothur "#unique.seqs(fasta=$(ls -t ${prefix}*.good.unique.good.filter.fasta | head -n1), count=$(ls -t ${prefix}*.trim.good.count_table | head -n1))"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.good.unique.good.filter.unique.fasta | head -n1), processors=${numproc})"
 
+# ----------------------------------------------------
+# clustering and classifying
+# ----------------------------------------------------
 
+# pre-cluster: reduces the error rate by collapsing reads that are within 2nt of each other (may take a long time)
+echo "Preclustering reads..."
+mothur "#pre.cluster(fasta=$(ls -t ${prefix}*.good.unique.good.filter.unique.fasta | head -n1), count=$(ls -t ${prefix}*.good.unique.good.filter.count_table | head -n1), diffs=2, processors=${numproc})"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.good.unique.good.filter.unique.precluster.fasta | head -n1), processors=${numproc})"
+
+# remove chimeras
+echo "Removing chimeras..."
+mothur "#chimera.uchime(fasta=$(ls -t ${prefix}*.good.unique.good.filter.unique.precluster.fasta | head -n1), count=$(ls -t ${prefix}*.good.unique.good.filter.unique.precluster.count_table | head -n1), dereplicate=t, processors=${numproc})"
+# !!!!! ----- note to Jamie: have run all code through the step above this line
+
+mothur "#remove.seqs(fasta=$(ls -t ${prefix}*.precluster.fasta | head -n1), accnos=$(ls -t *.accnos | head -n1))"
+mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.fasta | head -n1), count=$(ls -t ${prefix}*.pick.count_table | head -n1), processors=${numproc})"
+
+# discard singletons to reduce error rate further
+echo "Discarding singletons..."
+mothur "#split.abund(fasta=$(ls -t ${prefix}*.pick.fasta | head -n1), count=$(ls -t ${prefix}*.pick.count_table | head -n1), cutoff=1, accnos=true)"
