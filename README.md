@@ -137,11 +137,13 @@ At this point, we should have an complete environment capable of processing what
 cd ~/NWPac_amplicon/scripts/
 ```
 
+### Modify our "workhorse" script to specify necessary variables
+
 We've already run the first two scripts in this directory to get our environment set up; now we'll make use of the others to process our data. Much of the pipeline written into the scripts is based on the [mothur team's example MiSeq SOP](https://mothur.org/wiki/MiSeq_SOP), with some additional guidance [from this blog post](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/).
 
 The main processing script ([03_16S_process.sh](scripts/03_16S_process.sh)) will allow you to process 16S amplicon sequence .fastq data residing in one or more directories subordinate to any file path you specify. If you do have data in a number of different directories, note that these will be combined about a quarter of the way into the process. (If you want to process segments of your data separately for some reason, remember to point the script at only the specific directory of interest.)
 
-Before we can run our script, we need to set some variables and file paths. We'll do this by editing the values of several variables within the following section of the processing script [03_16S_process.sh](scripts/03_16S_process.sh):  
+Before we run our script, we need to set some variables and file paths. We'll do this by editing the values of several variables within the following section of the processing script [03_16S_process.sh](scripts/03_16S_process.sh):  
 ```
 # ----------------------------------------------------
 # specify some file locations and other variables
@@ -169,15 +171,61 @@ supplied_v4ref="../databases/silva.v4.fasta" # path to mothur-compatible referen
 ```
 You can edit the script on GitHub or on your own computer before you clone the repository to the remote. If you choose to set things up in advance using GitHub, you make your modifications only to files in a fork of the main repository; there's no need to commit changes to scripts in the master branch unless making functional changes to the code. The other benefit to this practice: Creating a fork each time you run the pipeline will allow you to save the parameters and scripts you used such that you (or anyone else) could reproduce your results for that particular dataset, exactly. (Alternatively, you can of course set the values of your variables by editing the script file directly once it's on the remote client.) When editing, the comments following each variable should be self-explanatory. Some of the "default" values for the numeric parameters are drawn from [this example pipeline](https://mothur.org/wiki/MiSeq_SOP).
 
-Once you've got everything set the way you want it (and, of course, you've transferred your data files to the location on the remote you've specified for `file_dir`), you should be ready to run the script. Double-check to make sure you've specifed all the necessary file paths correctly, or plan to check back on the progress of your run frequently to make sure the script hasn't thrown an error. (The latter is best practice anyway.) We can run the script by sourcing it at the command line from within the `scripts` directory:
+### Running things: The simplest way
+
+Once you've got everything set the way you want it (and, of course, you've transferred your data files to the location on the remote you've specified for `file_dir`), you should be ready to run the script. Double-check to make sure you've specifed all the necessary file paths correctly, or plan to check back on the progress of your run frequently to make sure the script hasn't thrown an error. (The latter is best practice anyway.) We *could* run the script right away simply by sourcing it at the command line from within the `scripts` directory:
 ```
 source ./03_16S_process.sh
 ```
-Before you disconnect from your remote and walk away, you will be asked for input at one interactive prompt:
+This will work fine, *except you'll have to remain connected to the remote instance to keep the processes running.* If you want to be able to disconnect from the remote while your script runs, you'll have to run things in a "screen."
+
+### Running things so you can actually disconnect from the remote computer: Setting up a screen
+
+For this, we'll use **tmux**, which is included on most of the Amazon Ubuntu machine images. First, while still connected to the remote machine, we'll start **tmux**:
+```
+tmux
+```
+Assuming we are in the `~/NWPac_amplicon/scripts` directory, we can then run exactly the same code as above:
+```
+source ./03_16S_process.sh
+```
+... except this time, we're in a screen from which we can "detach" ourselves. Once you see that things are running properly (and have answered yes or no to the prompt described below), we can detach from the screen by typing
+
+**Ctrl** + **b** and then **d**
+
+We are now back out at our shell prompt... but the script is still doing its magic in the background! Upon detaching, you will receive some sort of message like this:
+```
+[detached (from session 0)]
+```
+Make a (mental) note of the session number (in this case, "0") because we'll need it a bit later. At this point, we can end our ssh session (i.e., close our connection to the remote) by typing
+```
+exit
+```
+... and voilà! You should be back at the command line on your own computer.
+
+To reconnect to the remote (and check our progress/run some more scripts/collect our output), open a shell window on your computer and connect via ssh, using the same directions as above. Once reconnected to the remote, we can open up the screen from which detached earlier by calling **tmux** again, this time using `a -t` for `attach` by name:
+```
+tmux a -t myname
+````
+where `myname` is the name (session number) of session in which you are running your script. This should be the number of which you earlier made a mental note. If you forgot which session(s) are running, you can try:
+```
+tmux ls
+```
+and then pick out the right session number to use in the attach command.
+
+Once reattached, you should see the commands in your script progressing along (or stopped on some sort of error, or, if you're *really* lucky, done processing). To detach again, simply use the same key combination as above.
+
+There is a (good tmux cheatsheet here)[https://gist.github.com/henrik/1967800].
+
+### Some general notes, whether you run things in a screen or not
+
+Before you disconnect from your remote/walk away, you will be asked for input at one interactive prompt:
 ```
 Do you want me to try and retrieve the latest mothur-compatible Silva reference database for you? [Y/n] 
 ```
 Based on your response, 03_16S_process.sh will either use the reference database and taxonomy files you've uploaded yourself (paths specified for `supplied_v4ref`, `supplied_DB_ref`, and `supplied_DB_tax`) **or** the helper script [get_mothurSilvafile.sh](scripts/get_mothurSilvafile.sh) will attempt to download the latest mothur-compatible Silva reference database automatically from the [mothur wiki site](https://www.mothur.org/wiki/Silva_reference_files) and then perform some necessary extractions and conversions.
+
+### What the script actually does, and some important notes
 
 As the script runs, it will perform a variety of tasks using shell functions, the mothur package, and Python. As different mothur functions are called, a series of data objects will be created in the top-level directory (i.e., your `file_dir`). In addition, mothur will create and write to the same directory a series of log files for each function call.
 
