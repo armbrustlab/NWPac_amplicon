@@ -1,6 +1,6 @@
 # NWPac_amplicon
 
-Scripts and other necessary files to build a cloud- or cluster-ready pipeline for workup of 16S/18S amplicon sequence data. The pipeline is designed to be fully reproducible. Currently configured to process data from three cruises in the NW Pacific Ocean.
+Scripts and other necessary files to build a cloud- or cluster-ready pipeline for workup of 16S/18S amplicon sequence data. The pipeline is designed to be fully reproducible. Currently configured to process data from three cruises in the NW Pacific Ocean. Authorship history: Much of the original scripting was done by Rachelle Lim. The pipeline as it appears here (as of May 23, 2018) was developed and written by former eScience postdoc Jamie Collins, james.r.collins@aya.yale.edu. 
 
 ## Software we'll need
 
