@@ -219,11 +219,43 @@ mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.good.unique.good.filter.unique.pr
 # remove chimeras
 echo "Removing chimeras..."
 mothur "#chimera.uchime(fasta=$(ls -t ${prefix}*.good.unique.good.filter.unique.precluster.fasta | head -n1), count=$(ls -t ${prefix}*.good.unique.good.filter.unique.precluster.count_table | head -n1), dereplicate=t, processors=${numproc})"
-# !!!!! ----- note to Jamie: have run all code through the step above this line
-
 mothur "#remove.seqs(fasta=$(ls -t ${prefix}*.precluster.fasta | head -n1), accnos=$(ls -t *.accnos | head -n1))"
 mothur "#summary.seqs(fasta=$(ls -t ${prefix}*.fasta | head -n1), count=$(ls -t ${prefix}*.pick.count_table | head -n1), processors=${numproc})"
 
 # discard singletons to reduce error rate further
 echo "Discarding singletons..."
 mothur "#split.abund(fasta=$(ls -t ${prefix}*.pick.fasta | head -n1), count=$(ls -t ${prefix}*.pick.count_table | head -n1), cutoff=1, accnos=true)"
+#where Jamie got to,  need to find correct reference database to go any further.
+
+#classify sequences against reference database
+echo "classifying sequences against reference database...."
+mothur "#classify.seqs(fasta=$(ls -t *.abund.fasta | head -n1), count=$(ls -t *.abund.count_table | head -n1), reference=$DB_REF, taxonomy=$DB_TAX, cutoff=$CLASS_CUTOFF, processors = 8)"
+
+#removing taxa that we're not interested in! 
+echo "removing reads from" $BAD_TAXA
+mothur "#remove.lineage(fasta=$(ls -t *.abund.fasta | head -n1), count=$(ls -t *.abund.count_table | head -n1), taxonomy=$(ls -t *.wang.taxonomy | head -n1), taxon=$BAD_TAXA)"
+
+#renaming sequences to add the group (ie the sample name)
+echo "renaming sequences......"
+mothur "#rename.seqs(fasta=$(ls -t *.pick.fasta | head -n1))"
+mothur-3-renameFiles.py $(ls -t *.renamed_map | head -n1) $(ls -t *.pick.count_table | head -n1) ${PREFIX}.renamed.count_table $(ls -t *.${TAXNAME}.wang.pick.taxonomy | head -n1) ${PREFIX}.renamed.taxonomy
+mothur "#summary.seqs(fasta=$(ls -t *.fasta | head -n1), count=$(ls -t *.count_table | head -n1), processors=8)"
+
+#cluster into OTUs
+echo "clustering into OTUs......"
+echo "note: this step can take a VERY!!! long time"
+mothur "#cluster.split(fasta=$(ls -t *.renamed.fasta | head -n1), count=${PREFIX}.renamed.count_table, taxonomy=${PREFIX}.renamed.taxonomy, splitmethod=classify, taxlevel=4, cutoff=0.03, cluster=f, processors=8)"
+mothur "#cluster.split(file=$(ls -t *.renamed.file | head -n1), processors=7)"
+
+#synthesize into shared file
+echo "make summary file......"
+mothur "#make.shared(list=$(ls -t *.list | head -n1), count=${PREFIX}.renamed.count_table, label=$OTU_CUTOFF)"
+
+#classify OTUs using the consensus taxonomy from the sequence classification
+echo "classifying OTUs based on sequence consensus taxonomy...."
+mothur "#classify.otu(list=$(ls -t *.list | head -n1), count=${PREFIX}.renamed.count_table, taxonomy=${PREFIX}.renamed.taxonomy, label=$OTU_CUTOFF)"
+mv $(ls -t *.shared | head -n1) ${PREFIX}.stability.an.shared
+mv $(ls -t *.cons.taxonomy | head -n1) ${PREFIX}.stability.an.cons.taxonomy
+echo "pipeline completed!"
+echo "use" ${PREFIX}.stability.an.shared "for your downstream analyses!"
+
